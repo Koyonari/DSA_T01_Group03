@@ -1,10 +1,13 @@
 // DSA_T01_Group03 By An Yong Shyan and Brandon Koh
-
-#include <iostream>
 using namespace std;
+#include <iostream>
+#include "Dictionary.h"
+#include "List.h"
+
 
 int main()
 {
+	Dictionary actorDict(true);
 	while (true) {
 		cout << "----------------------MOVIE WIKI----------------------\n";
 		cout << "Welcome to Movie Wiki! This program allows you to add, update, and track movies and actors.\n";
@@ -28,13 +31,18 @@ int main()
 						break;
 					}
 					else if (operation == 1) {
+						cout << "Enter actor ID: ";
+						int id;
+						cin >> id;
+						cin.ignore();
 						cout << "Enter actor name: ";
 						string name;
-						cin >> name;
+						getline(cin, name);
 						cout << "Enter actor birth year: ";
 						int birthYear;
 						cin >> birthYear;
-						// Add actor to dictionary method
+						actorDict.add(id, name, birthYear);
+						actorDict.print();
 					}
 					else if (operation == 2) {
 						cout << "Enter movie title: ";
@@ -126,6 +134,9 @@ int main()
 					cin >> id;
 				}
 			}
+		}
+		else if (choice == 0) {
+			return 1;
 		}
 	}
 

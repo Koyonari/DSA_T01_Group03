@@ -67,3 +67,28 @@ bool List::add(Movie* movie) {
     size++;
     return true;
 }
+
+void List::print() {
+    if (isActorList) {
+        std::cout << "Actor List:\n";
+        ActorListNode* current = firstActorNode;
+        while (current != nullptr) {
+            std::cout << "ID: " << current->actor->id
+                << ", Name: " << current->actor->name
+                << ", Birth Year: " << current->actor->birthYear
+                << "\n";
+            current = current->next;
+        }
+    }
+    else {
+        std::cout << "Movie List:\n";
+        MovieListNode* current = firstMovieNode;
+        while (current != nullptr) {
+            std::cout << "ID: " << current->movie->id
+                << ", Title: " << current->movie->title
+                << ", Year: " << current->movie->year
+                << "\n";
+            current = current->next;
+        }
+    }
+}

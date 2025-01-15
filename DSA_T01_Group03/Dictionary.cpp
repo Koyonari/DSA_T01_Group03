@@ -100,3 +100,34 @@ bool Dictionary::add(int key, string name, int value) {
     size++;
     return true;
 }
+
+void Dictionary::print() {
+    std::cout << "Dictionary Contents:\n";
+
+    if (isActorDict) {
+        std::cout << "Actors:\n";
+        for (int i = 0; i < MAX_SIZE; i++) {
+            ActorNode* current = actorItems[i];
+            while (current != nullptr) {
+                std::cout << "ID: " << current->actor->id
+                    << ", Name: " << current->actor->name
+                    << ", Birth Year: " << current->actor->birthYear
+                    << ", Movies: (List Placeholder)\n";
+                current = current->next;
+            }
+        }
+    }
+    else {
+        std::cout << "Movies:\n";
+        for (int i = 0; i < MAX_SIZE; i++) {
+            MovieNode* current = movieItems[i];
+            while (current != nullptr) {
+                std::cout << "ID: " << current->movie->id
+                    << ", Title: " << current->movie->title
+                    << ", Year: " << current->movie->year
+                    << ", Cast: (List Placeholder)\n";
+                current = current->next;
+            }
+        }
+    }
+}
