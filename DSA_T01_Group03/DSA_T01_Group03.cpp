@@ -87,7 +87,7 @@ int main()
 				}
 			}
 			else {
-				cout << "Access denied\n";
+				cout << "Access denied!\n\n";
 			}
 		}
 		else if (choice == 2) {
@@ -124,7 +124,10 @@ int main()
 					cout << "Enter actor ID: ";
 					int id;
 					cin >> id;
+				}
 			}
 		}
 	}
+
+	return 0;
 }
