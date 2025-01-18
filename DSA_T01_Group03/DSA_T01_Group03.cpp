@@ -8,6 +8,7 @@ using namespace std;
 int main()
 {
 	Dictionary actorDict(true);
+	Dictionary movieDict(false);
 	while (true) {
 		cout << "----------------------MOVIE WIKI----------------------\n";
 		cout << "Welcome to Movie Wiki! This program allows you to add, update, and track movies and actors.\n";
@@ -45,13 +46,18 @@ int main()
 						actorDict.print();
 					}
 					else if (operation == 2) {
+						cout << "Enter movie ID: ";
+						int id;
+						cin >> id;
+						cin.ignore();
 						cout << "Enter movie title: ";
 						string title;
-						cin >> title;
+						getline(cin, title);
 						cout << "Enter movie year: ";
 						int year;
 						cin >> year;
-						// Add movie to dictionary method
+						movieDict.add(id, title, year);
+						movieDict.print();
 					}
 					else if (operation == 3) {
 						cout << "Enter movie ID: ";
