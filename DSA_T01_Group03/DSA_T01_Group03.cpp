@@ -43,7 +43,7 @@ int main()
 						int birthYear;
 						cin >> birthYear;
 						actorDict.add(id, name, birthYear);
-						actorDict.print();
+						
 					}
 					else if (operation == 2) {
 						cout << "Enter movie ID: ";
@@ -57,7 +57,7 @@ int main()
 						int year;
 						cin >> year;
 						movieDict.add(id, title, year);
-						movieDict.print();
+						
 					}
 					else if (operation == 3) {
 						cout << "Enter movie ID: ";
@@ -85,7 +85,8 @@ int main()
 						cout << "Enter new actor birth year: ";
 						int birthYear;
 						cin >> birthYear;
-						// Update actor in dictionary method
+						actorDict.update(id, name, birthYear);
+						
 					}
 					else if (operation == 5) {
 						cout << "Enter movie ID: ";
@@ -97,7 +98,7 @@ int main()
 						cout << "Enter new movie year: ";
 						int year;
 						cin >> year;
-						// Update movie in dictionary method
+						movieDict.update(id, title, year);
 					}
 				}
 			}

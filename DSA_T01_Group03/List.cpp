@@ -68,6 +68,40 @@ bool List::add(Movie* movie) {
     return true;
 }
 
+bool Dictionary::update(int key, string name, int value) {
+    int index = hash(key);
+
+    if (isActorDict) {
+        // Find the actor node
+        ActorNode* current = actorItems[index];
+        while (current != nullptr) {
+            if (current->key == key) {
+                // Update the actor's details
+                current->actor->name = name;
+                current->actor->birthYear = value;
+                return true;  // Successfully updated
+            }
+            current = current->next;
+        }
+    }
+    else {
+        // Find the movie node
+        MovieNode* current = movieItems[index];
+        while (current != nullptr) {
+            if (current->key == key) {
+                // Update the movie's details
+                current->movie->title = name;
+                current->movie->year = value;
+                return true;  // Successfully updated
+            }
+            current = current->next;
+        }
+    }
+
+    // If no entry found, return false
+    return false;
+}
+
 void List::print() {
     if (isActorList) {
         std::cout << "Actor List:\n";

@@ -51,6 +51,7 @@ public:
     Dictionary(bool isActor);
     ~Dictionary();
     bool add(int key, string name, int value);
+    bool update(int key, string name, int value);
     void remove(int key);
     Actor* getActor(int key);
     Movie* getMovie(int key);
