@@ -78,9 +78,10 @@ int main()
 						cout << "Enter actor ID: ";
 						int id;
 						cin >> id;
+						cin.ignore();
 						cout << "Enter new actor name: ";
 						string name;
-						cin >> name;
+						getline(cin, name);
 						cout << "Enter new actor birth year: ";
 						int birthYear;
 						cin >> birthYear;
