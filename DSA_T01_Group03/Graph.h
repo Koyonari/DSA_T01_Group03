@@ -1,6 +1,18 @@
+// Graph.h
 #pragma once
 #include <string>
+#include <vector>
 using namespace std;
+
+// MovieInfo structure should be in the header since it's used in both files
+struct MovieInfo {
+    string title;
+    int year;
+    string plot;
+
+    MovieInfo(const string& t, int y, const string& p)
+        : title(t), year(y), plot(p) {}
+};
 
 class Graph {
 private:
@@ -25,6 +37,12 @@ private:
     int numVertices;
     int hash(int key);
 
+    // Sorting helper functions
+    void mergeSort(vector<pair<string, int>>& arr, int left, int right);
+    void merge(vector<pair<string, int>>& arr, int left, int mid, int right);
+    void insertionSort(vector<string>& arr);
+    void insertionSortMovies(vector<MovieInfo>& arr);
+
 public:
     Graph();
     ~Graph();
@@ -33,7 +51,6 @@ public:
     Vertex* findVertex(int id, bool isActor);
     bool addVertex(int id, string name, int value, bool isActor, string plot = "");
     bool addEdge(int actorId, int movieId);
-    bool removeEdge(int actorId, int movieId);
 
     // Query operations
     void displayActorsByAge(int startAge, int endAge);
