@@ -10,8 +10,11 @@ using namespace std;
 void importActorCSV(const string& filename, Graph& graph);
 void importMovieCSV(const string& filename, Graph& graph);
 void importCastCSV(const string& filename, Graph& graph);
-void appendActorToCSV(const string& filename, int id, const string& name, int birthYear);
+void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph);
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph);
+void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph);
+void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph);
+void appendCastToCSV(const string& filename, int actorid, int movieid, Graph& graph);
 int main() {
     Graph movieGraph;
 
@@ -75,13 +78,8 @@ int main() {
                         int birthYear;
                         cin >> birthYear;
 
-                        if (movieGraph.addVertex(id, name, birthYear, true)) {
-                            appendActorToCSV("actors.csv", id, name, birthYear);
-                            cout << "Actor added successfully!\n";
-                        }
-                        else {
-                            cout << "Failed to add actor. ID may already exist.\n";
-                        }
+                     
+                        appendActorToCSV("actors.csv", id, name, birthYear, movieGraph);
                     }
                     else if (operation == 2) {
                         cout << "Enter movie ID: ";
@@ -99,12 +97,7 @@ int main() {
                         string plot;
                         getline(cin, plot);
 
-                        if (movieGraph.addVertex(id, title, year, false, plot)) {
-                            cout << "Movie added successfully!\n";
-                        }
-                        else {
-                            cout << "Failed to add movie. ID may already exist.\n";
-                        }
+                        appendMovieToCSV("movies.csv", id, title, year, plot, movieGraph);
                     }
                     else if (operation == 3) {
                         cout << "Enter actor ID: ";
@@ -114,12 +107,7 @@ int main() {
                         int movieId;
                         cin >> movieId;
 
-                        if (movieGraph.addEdge(actorId, movieId)) {
-                            cout << "Actor added to movie successfully!\n";
-                        }
-                        else {
-                            cout << "Failed to add actor to movie. Please check IDs.\n";
-                        }
+                        appendCastToCSV("cast.csv", actorId, movieId, movieGraph);
                     }
                     else if (operation == 4) {
                         cout << "Enter actor ID to update: ";
@@ -150,16 +138,7 @@ int main() {
                         string plot;
                         getline(cin, plot);
 
-                        auto vertex = movieGraph.findVertex(id, false);
-                        if (vertex) {
-                            if (!title.empty()) vertex->name = title;
-                            if (year != 0) vertex->value = year;
-                            if (!plot.empty()) vertex->plot = plot;
-                            cout << "Movie updated successfully!\n";
-                        }
-                        else {
-                            cout << "Movie not found.\n";
-                        }
+                        updateMovieInCSV("movies.csv", id, title, year, plot, movieGraph);
                     }
                 }
             }
@@ -419,17 +398,22 @@ void importCastCSV(const string& filename, Graph& graph) {
     file.close();
 }
 
-void appendActorToCSV(const string& filename, int id, const string& name, int birthYear) {
-    ofstream file(filename, ios::app);
-    if (!file.is_open()) {
-        cout << "Error: Could not open file " << filename << endl;
-        cout << "Actor was not able to be added successfully.\n";
-        return;
-    }
+void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph) {
+    if (graph.addVertex(id, name, birthYear, true)) { //add actor to the graph
+        ofstream file(filename, ios::app);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file " << filename << endl;
+            cout << "Actor was not able to be added successfully.\n";
+            return;
+        }
 
-    file << id << ",\"" << name << "\"," << birthYear << "\n";
-    file.close();
-    cout << "Actor successfully added to " << filename << endl;
+        file << id << ",\"" << name << "\"," << birthYear << "\n";
+        file.close();
+        cout << "Actor successfully added to the graph and " << filename << endl;
+    }
+    else {
+        cout << "Failed to add actor. ID may already exist in the graph.\n";
+    }
 }
 
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph) {
@@ -494,5 +478,111 @@ void updateActorInCSV(const string& filename, int id, const string& newName, int
     }
     else {
         cout << "Actor with ID " << id << " not found in the graph.\n";
+    }
+}
+
+void appendCastToCSV(const string& filename, int actorid, int movieid, Graph& graph) {
+    if (graph.addEdge(actorid, movieid)) {
+        ofstream file(filename, ios::app);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file " << filename << endl;
+            cout << "Actor was not able to be added successfully.\n";
+            return;
+        }
+
+        file << actorid << "," << movieid << "\n";
+        file.close();
+        cout << "Actor added to movie successfully!\n";
+    }
+    else {
+        cout << "Failed to add actor to movie.\n";
+    }
+
+}
+
+void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph) {
+    auto movie = graph.findVertex(id, false); // Update the graph also
+    if (movie) {
+        if (!newTitle.empty()) movie->name = newTitle;
+        if (newYear != 0) movie->value = newYear;
+        if (!newPlot.empty()) movie->plot = newPlot;
+
+        ifstream inFile(filename);
+        ofstream tempFile("temp.csv");
+
+        if (!inFile.is_open() || !tempFile.is_open()) {
+            cout << "Error: Could not open files" << endl;
+            return;
+        }
+
+        string line;
+        bool found = false;
+
+        // Copy the header line
+        getline(inFile, line);
+        tempFile << line << "\n";
+
+        while (getline(inFile, line)) {
+            stringstream ss(line);
+            string idStr, title, plot, yearStr;
+
+            // Extract fields
+            getline(ss, idStr, ',');
+            getline(ss, title, ',');
+            getline(ss, plot, ',');
+            getline(ss, yearStr, ',');
+
+            try {
+                int currentId = stoi(idStr);
+
+                if (currentId == id) {
+                    // Write updated movie details
+                    tempFile << id << ",\"" << newTitle << "\",\"" << newPlot << "\"," << newYear << "\n";
+                    found = true;
+                }
+                else {
+                    // Write original line
+                    tempFile << line << "\n";
+                }
+            }
+            catch (const invalid_argument& e) {
+                tempFile << line << "\n"; // Continue if unable to parse
+            }
+        }
+
+        inFile.close();
+        tempFile.close();
+
+        // Replace original file with updated file
+        if (found) {
+            remove(filename.c_str());
+            rename("temp.csv", filename.c_str());
+            cout << "Movie updated in " << filename << " and graph successfully.\n";
+        }
+        else {
+            remove("temp.csv");
+            cout << "Movie with ID " << id << " not found in " << filename << ".\n";
+        }
+    }
+    else {
+        cout << "Movie with ID " << id << " not found in the graph.\n";
+    }
+}
+
+void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph) {
+    if (graph.addVertex(id, title, year, false, plot)) { // Add movie to the graph
+        ofstream file(filename, ios::app);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file " << filename << endl;
+            cout << "Movie was not able to be added successfully.\n";
+            return;
+        }
+
+        file << id << ",\"" << title << "\",\"" << plot << "\"," << year << "\n";
+        file.close();
+        cout << "Movie successfully added to the graph and " << filename << endl;
+    }
+    else {
+        cout << "Failed to add movie. ID may already exist in the graph.\n";
     }
 }
