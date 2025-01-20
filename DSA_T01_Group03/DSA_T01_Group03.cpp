@@ -266,7 +266,6 @@ void importActorCSV(const string& filename, Graph& graph) {
     cout << "Imported " << count << " actors successfully." << endl;
     file.close();
 }
-
 void importMovieCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -275,51 +274,85 @@ void importMovieCSV(const string& filename, Graph& graph) {
     }
 
     string line;
-    getline(file, line); // Skip header
-    int count = 0;
-
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string idStr, title, plot, yearStr;
-
-        if (!getline(ss, idStr, ',')) continue;
-        if (!getline(ss, title, ',')) continue;
-
-        if (title.front() == '"') {
-            string extra;
-            while (getline(ss, extra, ',')) {
-                title += ',' + extra;
-                if (title.back() == '"') break;
-            }
-            title = title.substr(1, title.length() - 2);
-        }
-
-        if (!getline(ss, plot, ',')) continue;
-        if (plot.front() == '"') {
-            string extra;
-            while (getline(ss, extra, ',')) {
-                plot += ',' + extra;
-                if (plot.back() == '"') break;
-            }
-            plot = plot.substr(1, plot.length() - 2);
-        }
-
-        if (!getline(ss, yearStr)) continue;
-
-        try {
-            int id = stoi(idStr);
-            int year = stoi(yearStr);
-            if (graph.addVertex(id, title, year, false, plot)) {
-                count++;
-                if (count % 100 == 0) {
-                    cout << "Processed " << count << " movies...\r";
-                }
-            }
-        }
-        catch (const exception& e) {
-            cout << "Error processing movie: " << idStr << " - " << e.what() << endl;
-        }
+    // Skip the header line
+    if (getline(file, line)) {
+        cout << "Skipping header: " << line << endl;
     }
+
+    int count = 0;
+    while (getline(file, line)) {
+        // Variables to store parsed data
+        int id, year;
+        string title, plot;
+
+        // State variables for parsing
+        size_t pos = 0;
+        bool inQuotes = false;
+        string currentField;
+        int fieldCount = 0;
+
+        // Parse the line character by character
+        for (size_t i = 0; i < line.length(); i++) {
+            char c = line[i];
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            }
+            else if (c == ',' && !inQuotes) {
+                // Process the completed field
+                switch (fieldCount) {
+                case 0: // ID
+                    try {
+                        id = stoi(currentField);
+                    }
+                    catch (...) {
+                        cout << "Invalid ID in line: " << line << endl;
+                        goto nextLine;
+                    }
+                    break;
+                case 1: // Title
+                    // Remove quotes if present
+                    if (currentField.front() == '"' && currentField.back() == '"') {
+                        currentField = currentField.substr(1, currentField.length() - 2);
+                    }
+                    title = currentField;
+                    break;
+                case 2: // Plot
+                    // Remove quotes if present
+                    if (currentField.front() == '"' && currentField.back() == '"') {
+                        currentField = currentField.substr(1, currentField.length() - 2);
+                    }
+                    plot = currentField;
+                    break;
+                }
+                currentField.clear();
+                fieldCount++;
+            }
+            else {
+                currentField += c;
+            }
+        }
+
+        // Process the last field (year)
+        try {
+            year = stoi(currentField);
+        }
+        catch (...) {
+            cout << "Invalid year in line: " << line << endl;
+            continue;
+        }
+
+        // Add to graph (false indicates it's a movie, not an actor)
+        if (graph.addVertex(id, title, year, false, plot)) {
+            count++;
+            if (count % 100 == 0) {
+                cout << "Processed " << count << " movies...\r";
+            }
+        }
+
+    nextLine:
+        continue;
+    }
+
     cout << "Imported " << count << " movies successfully." << endl;
     file.close();
 }
@@ -332,30 +365,65 @@ void importCastCSV(const string& filename, Graph& graph) {
     }
 
     string line;
-    getline(file, line); // Skip header
+    // Skip the header line
+    if (getline(file, line)) {
+        cout << "Skipping header: " << line << endl;
+    }
+
     int count = 0;
-
     while (getline(file, line)) {
-        stringstream ss(line);
-        string actorIdStr, movieIdStr;
+        // State variables for parsing
+        size_t pos = 0;
+        string currentField;
+        int fieldCount = 0;
+        int actorId, movieId;
 
-        getline(ss, actorIdStr, ',');
-        getline(ss, movieIdStr, ',');
-
-        try {
-            int actorId = stoi(actorIdStr);
-            int movieId = stoi(movieIdStr);
-            if (graph.addEdge(actorId, movieId)) {
-                count++;
-                if (count % 100 == 0) {
-                    cout << "Processed " << count << " cast relationships...\r";
+        // Parse the line character by character
+        for (size_t i = 0; i < line.length(); i++) {
+            char c = line[i];
+            if (c == ',') {
+                // Process the completed field
+                try {
+                    if (fieldCount == 0) {
+                        actorId = stoi(currentField);
+                    }
+                    else if (fieldCount == 1) {
+                        movieId = stoi(currentField);
+                    }
                 }
+                catch (...) {
+                    cout << "Invalid ID in line: " << line << endl;
+                    goto nextLine;
+                }
+                currentField.clear();
+                fieldCount++;
+            }
+            else {
+                currentField += c;
             }
         }
-        catch (const invalid_argument& e) {
-            cout << "Skipping invalid cast row: " << line << endl;
+
+        // Process the last field
+        try {
+            movieId = stoi(currentField);
         }
+        catch (...) {
+            cout << "Invalid movie ID in line: " << line << endl;
+            continue;
+        }
+
+        // Add edge to graph
+        if (graph.addEdge(actorId, movieId)) {
+            count++;
+            if (count % 100 == 0) {
+                cout << "Processed " << count << " cast relationships...\r";
+            }
+        }
+
+    nextLine:
+        continue;
     }
+
     cout << "Imported " << count << " cast relationships successfully." << endl;
     file.close();
 }
