@@ -433,14 +433,11 @@ void appendActorToCSV(const string& filename, int id, const string& name, int bi
 }
 
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph) {
-    // Update actor information in the graph
-    auto actor = graph.findVertex(id, true);  // Assuming the graph's `findVertex` method works for finding actors
+    auto actor = graph.findVertex(id, true);   //update the graph also
     if (actor) {
         actor->name = newName;
-        actor->value = newBirthYear;  // Assuming the birth year is stored in the `value` field
+        actor->value = newBirthYear;  
 
-        // Now proceed to update the CSV file
-        // Open the existing file and a temporary file
         ifstream inFile(filename);
         ofstream tempFile("temp.csv");
 
@@ -452,41 +449,39 @@ void updateActorInCSV(const string& filename, int id, const string& newName, int
         string line;
         bool found = false;
 
-        // Copy header line
+        //header line
         getline(inFile, line);
         tempFile << line << "\n";
 
-        // Process each line
         while (getline(inFile, line)) {
             stringstream ss(line);
             string idStr, name, birthStr;
 
-            // Parse the current line
+            //get the id
             getline(ss, idStr, ',');
 
             try {
                 int currentId = stoi(idStr);
 
                 if (currentId == id) {
-                    // Write updated information
+                    //updated info
                     tempFile << id << ",\"" << newName << "\"," << newBirthYear << "\n";
                     found = true;
                 }
                 else {
-                    // Write original line
+                    //write original line
                     tempFile << line << "\n";
                 }
             }
             catch (const invalid_argument& e) {
-                // If ID can't be converted to integer, write original line
-                tempFile << line << "\n";
+                tempFile << line << "\n"; //continue if cannot
             }
         }
 
         inFile.close();
         tempFile.close();
 
-        // Replace original file with updated file
+        //replace original file with updated file
         if (found) {
             remove(filename.c_str());
             rename("temp.csv", filename.c_str());
