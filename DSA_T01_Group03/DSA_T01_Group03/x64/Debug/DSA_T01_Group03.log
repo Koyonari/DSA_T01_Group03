@@ -3,6 +3,39 @@
 C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\DSA_T01_Group03.cpp(253,40): warning C4101: 'e': unreferenced local variable
 C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\DSA_T01_Group03.cpp(476,44): warning C4101: 'e': unreferenced local variable
   Graph.cpp
-C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\Graph.cpp(180,56): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\xmemory(727,82): error C2512: 'MovieInfo::MovieInfo': no appropriate default constructor available
+  (compiling source file 'Graph.cpp')
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\xmemory(727,82):
+  while trying to match the argument list '()'
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\xmemory(727,82):
+  the template instantiation context (the oldest one first) is
+  	C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\Graph.cpp(153,23):
+  	see reference to class template instantiation 'std::vector<MovieInfo,std::allocator<MovieInfo>>' being compiled
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\vector(616,5):
+  	while compiling class template member function 'std::vector<MovieInfo,std::allocator<MovieInfo>>::vector(const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<MovieInfo>
+          ]
+  		C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\Graph.cpp(153,27):
+  		see the first reference to 'std::vector<MovieInfo,std::allocator<MovieInfo>>::vector' in 'Graph::merge'
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\vector(618,9):
+  	see reference to function template instantiation 'void std::vector<MovieInfo,std::allocator<MovieInfo>>::_Construct_n<>(const unsigned __int64)' being compiled
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\vector(2077,36):
+  	see reference to function template instantiation 'MovieInfo *std::_Uninitialized_value_construct_n<std::allocator<MovieInfo>>(MovieInfo *,unsigned __int64,_Alloc &)' being compiled
+          with
+          [
+              _Alloc=std::allocator<MovieInfo>
+          ]
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\xmemory(2045,17):
+  	see reference to function template instantiation 'void std::_Uninitialized_backout_al<std::allocator<MovieInfo>>::_Emplace_back<>(void)' being compiled
+  	C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\xmemory(1805,35):
+  	see reference to function template instantiation 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,>(_Alloc &,_Objty *const )' being compiled
+          with
+          [
+              _Alloc=std::allocator<MovieInfo>,
+              _Ty=MovieInfo,
+              _Objty=MovieInfo
+          ]
+  
   Generating Code...
-  DSA_T01_Group03.vcxproj -> C:\Users\user\Documents\Files\Ngee Ann\Y2 Semester 2\Data Stuctures & Algorithms 4 CU\Assignment\DSA_T01_Group03\DSA_T01_Group03\x64\Debug\DSA_T01_Group03.exe

@@ -1,4 +1,3 @@
-// Graph.cpp
 #include "Graph.h"
 #include <iostream>
 #include <iomanip>
@@ -29,66 +28,6 @@ Graph::~Graph() {
 
 int Graph::hash(int key) {
     return key % MAX_VERTICES;
-}
-
-// Sorting function implementations
-void Graph::mergeSort(vector<pair<string, int>>& arr, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
-    }
-}
-
-void Graph::merge(vector<pair<string, int>>& arr, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-
-    vector<pair<string, int>> L(n1), R(n2);
-
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[left + i];
-    for (int j = 0; j < n2; j++)
-        R[j] = arr[mid + 1 + j];
-
-    int i = 0, j = 0, k = left;
-
-    while (i < n1 && j < n2) {
-        if (L[i].second <= R[j].second)
-            arr[k++] = L[i++];
-        else
-            arr[k++] = R[j++];
-    }
-
-    while (i < n1)
-        arr[k++] = L[i++];
-    while (j < n2)
-        arr[k++] = R[j++];
-}
-
-void Graph::insertionSort(vector<string>& arr) {
-    for (int i = 1; i < arr.size(); i++) {
-        string key = arr[i];
-        int j = i - 1;
-        while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
-}
-
-void Graph::insertionSortMovies(vector<MovieInfo>& arr) {
-    for (int i = 1; i < arr.size(); i++) {
-        MovieInfo key = arr[i];
-        int j = i - 1;
-        while (j >= 0 && arr[j].year > key.year) {
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
 }
 
 Graph::Vertex* Graph::findVertex(int id, bool isActor) {
@@ -154,6 +93,83 @@ bool Graph::addEdge(int actorId, int movieId) {
     return true;
 }
 
+// Quick sort implementation for actors by age
+void Graph::quickSort(vector<pair<string, int>>& arr, size_t low, size_t high) {
+    if (low < high) {
+        size_t pivot = partition(arr, low, high);
+        if (pivot > 0) quickSort(arr, low, pivot - 1);
+        quickSort(arr, pivot + 1, high);
+    }
+}
+
+size_t Graph::partition(vector<pair<string, int>>& arr, size_t low, size_t high) {
+    int pivot = arr[high].second;
+    size_t i = low - 1;
+
+    for (size_t j = low; j <= high - 1; j++) {
+        if (arr[j].second <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+// Quick sort for strings
+void Graph::quickSort(vector<string>& arr, size_t low, size_t high) {
+    if (low < high) {
+        size_t pivot = partition(arr, low, high);
+        if (pivot > 0) quickSort(arr, low, pivot - 1);
+        quickSort(arr, pivot + 1, high);
+    }
+}
+
+size_t Graph::partition(vector<string>& arr, size_t low, size_t high) {
+    string pivot = arr[high];
+    size_t i = low - 1;
+
+    for (size_t j = low; j <= high - 1; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+// Merge sort for movies by year
+void Graph::mergeSort(vector<MovieInfo>& arr, size_t left, size_t right) {
+    if (left < right) {
+        size_t mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+void Graph::merge(vector<MovieInfo>& arr, size_t left, size_t mid, size_t right) {
+    vector<MovieInfo> temp(right - left + 1);
+    size_t i = left, j = mid + 1, k = 0;
+
+    while (i <= mid && j <= right) {
+        if (arr[i].year <= arr[j].year) {
+            temp[k++] = arr[i++];
+        }
+        else {
+            temp[k++] = arr[j++];
+        }
+    }
+
+    while (i <= mid) temp[k++] = arr[i++];
+    while (j <= right) temp[k++] = arr[j++];
+
+    for (i = 0; i < k; i++) {
+        arr[left + i] = temp[i];
+    }
+}
+
 void Graph::displayActorsByAge(int startAge, int endAge) {
     int currentYear = 2024;
     vector<pair<string, int>> matchingActors;
@@ -176,8 +192,10 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
         return;
     }
 
-    // Use merge sort for age-based sorting
-    mergeSort(matchingActors, 0, matchingActors.size() - 1);
+    // Sort using quick sort
+    if (matchingActors.size() > 1) {
+        quickSort(matchingActors, 0, matchingActors.size() - 1);
+    }
 
     cout << "\nActors between " << startAge << " and " << endAge << " years old:" << endl;
     cout << "----------------------------------------" << endl;
@@ -207,8 +225,10 @@ void Graph::displayRecentMovies(int currentYear) {
         return;
     }
 
-    // Use insertion sort for movies by year
-    insertionSortMovies(recentMovies);
+    // Sort using merge sort for stable sorting by year
+    if (recentMovies.size() > 1) {
+        mergeSort(recentMovies, 0, recentMovies.size() - 1);
+    }
 
     cout << "\nMovies from the past 3 years:" << endl;
     cout << "----------------------------------------" << endl;
@@ -235,8 +255,9 @@ void Graph::displayActorMovies(int actorId) {
         current = current->next;
     }
 
-    // Use insertion sort for alphabetical ordering
-    insertionSort(movies);
+    if (movies.size() > 1) {
+        quickSort(movies, 0, movies.size() - 1);
+    }
 
     cout << "Movies starring " << actor->name << ":\n";
     for (const string& movie : movies) {
@@ -261,8 +282,9 @@ void Graph::displayMovieCast(int movieId) {
         current = current->next;
     }
 
-    // Use insertion sort for alphabetical ordering
-    insertionSort(actors);
+    if (actors.size() > 1) {
+        quickSort(actors, 0, actors.size() - 1);
+    }
 
     cout << "Cast of " << movie->name << ":\n";
     for (const string& actor : actors) {
@@ -297,8 +319,9 @@ void Graph::displayActorNetwork(int actorId) {
         movieEdge = movieEdge->next;
     }
 
-    // Use insertion sort for alphabetical ordering
-    insertionSort(coActors);
+    if (coActors.size() > 1) {
+        quickSort(coActors, 0, coActors.size() - 1);
+    }
 
     cout << "Actors who have worked with " << actor->name << ":\n";
     for (const string& coActor : coActors) {

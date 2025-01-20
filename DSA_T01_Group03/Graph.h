@@ -38,10 +38,17 @@ private:
     int hash(int key);
 
     // Sorting helper functions
-    void mergeSort(vector<pair<string, int>>& arr, int left, int right);
-    void merge(vector<pair<string, int>>& arr, int left, int mid, int right);
-    void insertionSort(vector<string>& arr);
-    void insertionSortMovies(vector<MovieInfo>& arr);
+    // Quick sort for actors by age
+    void quickSort(vector<pair<string, int>>& arr, size_t low, size_t high);
+    size_t partition(vector<pair<string, int>>& arr, size_t low, size_t high);
+
+    // Quick sort for strings (names)
+    void quickSort(vector<string>& arr, size_t low, size_t high);
+    size_t partition(vector<string>& arr, size_t low, size_t high);
+
+    // Merge sort for movies by year (stable sort)
+    void mergeSort(vector<MovieInfo>& arr, size_t left, size_t right);
+    void merge(vector<MovieInfo>& arr, size_t left, size_t mid, size_t right);
 
 public:
     Graph();
