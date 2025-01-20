@@ -210,6 +210,7 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
 void Graph::displayRecentMovies(int currentYear) {
     vector<MovieInfo> recentMovies;
 
+    // Collect recent movies from all buckets
     for (int i = 0; i < MAX_VERTICES; i++) {
         Vertex* current = vertices[i];
         while (current != nullptr) {
@@ -247,6 +248,8 @@ void Graph::displayActorMovies(int actorId) {
 
     vector<string> movies;
     Edge* current = actor->edges;
+
+    // Collect all movies the actor has starred in
     while (current != nullptr) {
         Vertex* movie = findVertex(current->destId, false);
         if (movie) {
@@ -255,11 +258,18 @@ void Graph::displayActorMovies(int actorId) {
         current = current->next;
     }
 
+    if (movies.empty()) {
+        cout << "No movies found for " << actor->name << ".\n";
+        return;
+    }
+
+    // Sort alphabetically using quicksort
     if (movies.size() > 1) {
         quickSort(movies, 0, movies.size() - 1);
     }
 
-    cout << "Movies starring " << actor->name << ":\n";
+    cout << "\nMovies starring " << actor->name << ":\n";
+    cout << "----------------------------------------" << endl;
     for (const string& movie : movies) {
         cout << "- " << movie << "\n";
     }
@@ -274,6 +284,8 @@ void Graph::displayMovieCast(int movieId) {
 
     vector<string> actors;
     Edge* current = movie->edges;
+
+    // Collect all actors in the movie
     while (current != nullptr) {
         Vertex* actor = findVertex(current->destId, true);
         if (actor) {
@@ -282,11 +294,18 @@ void Graph::displayMovieCast(int movieId) {
         current = current->next;
     }
 
+    if (actors.empty()) {
+        cout << "No cast found for " << movie->name << ".\n";
+        return;
+    }
+
+    // Sort alphabetically using quicksort
     if (actors.size() > 1) {
         quickSort(actors, 0, actors.size() - 1);
     }
 
-    cout << "Cast of " << movie->name << ":\n";
+    cout << "\nCast of " << movie->name << ":\n";
+    cout << "----------------------------------------" << endl;
     for (const string& actor : actors) {
         cout << "- " << actor << "\n";
     }
@@ -302,15 +321,20 @@ void Graph::displayActorNetwork(int actorId) {
     vector<string> coActors;
     Edge* movieEdge = actor->edges;
 
+    // For each movie the actor was in
     while (movieEdge != nullptr) {
         Vertex* movie = findVertex(movieEdge->destId, false);
         if (movie) {
             Edge* castEdge = movie->edges;
+            // For each actor in that movie
             while (castEdge != nullptr) {
-                if (castEdge->destId != actorId) {
+                if (castEdge->destId != actorId) {  // Don't include the original actor
                     Vertex* coActor = findVertex(castEdge->destId, true);
-                    if (coActor && find(coActors.begin(), coActors.end(), coActor->name) == coActors.end()) {
-                        coActors.push_back(coActor->name);
+                    if (coActor) {
+                        // Only add if not already in the list
+                        if (find(coActors.begin(), coActors.end(), coActor->name) == coActors.end()) {
+                            coActors.push_back(coActor->name);
+                        }
                     }
                 }
                 castEdge = castEdge->next;
@@ -319,11 +343,18 @@ void Graph::displayActorNetwork(int actorId) {
         movieEdge = movieEdge->next;
     }
 
+    if (coActors.empty()) {
+        cout << actor->name << " has not worked with any other actors.\n";
+        return;
+    }
+
+    // Sort alphabetically using quicksort
     if (coActors.size() > 1) {
         quickSort(coActors, 0, coActors.size() - 1);
     }
 
-    cout << "Actors who have worked with " << actor->name << ":\n";
+    cout << "\nActors who have worked with " << actor->name << ":\n";
+    cout << "----------------------------------------" << endl;
     for (const string& coActor : coActors) {
         cout << "- " << coActor << "\n";
     }
