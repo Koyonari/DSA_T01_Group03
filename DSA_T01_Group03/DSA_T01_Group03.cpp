@@ -11,7 +11,7 @@ void importActorCSV(const string& filename, Graph& graph);
 void importMovieCSV(const string& filename, Graph& graph);
 void importCastCSV(const string& filename, Graph& graph);
 void appendActorToCSV(const string& filename, int id, const string& name, int birthYear);
-
+void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph);
 int main() {
     Graph movieGraph;
 
@@ -132,16 +132,7 @@ int main() {
                         cout << "Enter new birth year (or 0 to skip): ";
                         int birthYear;
                         cin >> birthYear;
-
-                        auto vertex = movieGraph.findVertex(id, true);
-                        if (vertex) {
-                            if (!name.empty()) vertex->name = name;
-                            if (birthYear != 0) vertex->value = birthYear;
-                            cout << "Actor updated successfully!\n";
-                        }
-                        else {
-                            cout << "Actor not found.\n";
-                        }
+                        updateActorInCSV("actors.csv", id, name, birthYear, movieGraph);
                     }
                     else if (operation == 5) {
                         cout << "Enter movie ID to update: ";
@@ -439,4 +430,74 @@ void appendActorToCSV(const string& filename, int id, const string& name, int bi
     file << id << ",\"" << name << "\"," << birthYear << "\n";
     file.close();
     cout << "Actor successfully added to " << filename << endl;
+}
+
+void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph) {
+    // Update actor information in the graph
+    auto actor = graph.findVertex(id, true);  // Assuming the graph's `findVertex` method works for finding actors
+    if (actor) {
+        actor->name = newName;
+        actor->value = newBirthYear;  // Assuming the birth year is stored in the `value` field
+
+        // Now proceed to update the CSV file
+        // Open the existing file and a temporary file
+        ifstream inFile(filename);
+        ofstream tempFile("temp.csv");
+
+        if (!inFile.is_open() || !tempFile.is_open()) {
+            cout << "Error: Could not open files" << endl;
+            return;
+        }
+
+        string line;
+        bool found = false;
+
+        // Copy header line
+        getline(inFile, line);
+        tempFile << line << "\n";
+
+        // Process each line
+        while (getline(inFile, line)) {
+            stringstream ss(line);
+            string idStr, name, birthStr;
+
+            // Parse the current line
+            getline(ss, idStr, ',');
+
+            try {
+                int currentId = stoi(idStr);
+
+                if (currentId == id) {
+                    // Write updated information
+                    tempFile << id << ",\"" << newName << "\"," << newBirthYear << "\n";
+                    found = true;
+                }
+                else {
+                    // Write original line
+                    tempFile << line << "\n";
+                }
+            }
+            catch (const invalid_argument& e) {
+                // If ID can't be converted to integer, write original line
+                tempFile << line << "\n";
+            }
+        }
+
+        inFile.close();
+        tempFile.close();
+
+        // Replace original file with updated file
+        if (found) {
+            remove(filename.c_str());
+            rename("temp.csv", filename.c_str());
+            cout << "Actor updated in " << filename << " and graph successfully.\n";
+        }
+        else {
+            remove("temp.csv");
+            cout << "Actor with ID " << id << " not found in " << filename << ".\n";
+        }
+    }
+    else {
+        cout << "Actor with ID " << id << " not found in the graph.\n";
+    }
 }
