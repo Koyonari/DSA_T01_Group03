@@ -1,40 +1,44 @@
-// Graph.h
 #pragma once
-#include <vector>
 #include <string>
+using namespace std;
 
 class Graph {
 private:
-    static const int MAX_VERTICES = 1000;
+    static const int MAX_VERTICES = 150;  // Adjust size as needed
 
     struct Edge {
-        int actorId;
-        int movieId;
+        int destId;
         Edge* next;
     };
 
     struct Vertex {
         int id;
-        bool isActor;
-        Edge* edges;
-        Vertex* next;
+        bool isActor;  // true for actor, false for movie
+        string name;   // actor name or movie title
+        int value;     // birth year for actors, release year for movies
+        string plot;   // movie plot (empty for actors)
+        Edge* edges;   // linked list of connections
+        Vertex* next;  // for hash table chaining
     };
 
     Vertex* vertices[MAX_VERTICES];
     int numVertices;
     int hash(int key);
-    Vertex* findVertex(int id, bool isActor);
 
 public:
     Graph();
     ~Graph();
-    bool addVertex(int id, bool isActor);
+
+    // Core graph operations
+    Vertex* findVertex(int id, bool isActor);
+    bool addVertex(int id, string name, int value, bool isActor, string plot = "");
     bool addEdge(int actorId, int movieId);
     bool removeEdge(int actorId, int movieId);
-    void getMoviesForActor(int actorId, std::vector<int>& movieList);
-    void getActorsForMovie(int movieId, std::vector<int>& actorList);
-    void getActorNetwork(int actorId, std::vector<int>& connectedActors);
-    void print() const;
-    bool isEmpty() const;
-    int getSize() const;
+
+    // Query operations
+    void displayActorsByAge(int startAge, int endAge);
+    void displayRecentMovies(int currentYear);
+    void displayActorMovies(int actorId);
+    void displayMovieCast(int movieId);
+    void displayActorNetwork(int actorId);
 };

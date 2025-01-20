@@ -1,152 +1,374 @@
-// DSA_T01_Group03 By An Yong Shyan and Brandon Koh
-using namespace std;
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include "Graph.h"
 #include "Dictionary.h"
-#include "List.h"
 
+using namespace std;
 
-int main()
-{
-	Dictionary actorDict(true);
-	Dictionary movieDict(false);
-	while (true) {
-		cout << "----------------------MOVIE WIKI----------------------\n";
-		cout << "Welcome to Movie Wiki! This program allows you to add, update, and track movies and actors.\n";
-		cout << "1 - Administrator access \n2 - User access\n0 - Exit\nEnter access: ";
-		int choice;
-		cin >> choice;
-		if (choice == 0) {
-			break;
-		}
-		else if (choice == 1) {
-			cout << "Enter admin password: ";
-			string password;
-			cin >> password;
-			if (password == "admin123") {
-				cout << "Access granted!\n------------------------------------------------------\n";
-				while (true) {
-					cout << "Operations\n1 - Add new actor\n2 - Add new movie\n3 - Add an actor to a movie\n4 - Update actor details\n5 - Update movie details\n0 - Exit\nEnter operation: ";
-					int operation;
-					cin >> operation;
-					if (operation == 0) {
-						break;
-					}
-					else if (operation == 1) {
-						cout << "Enter actor ID: ";
-						int id;
-						cin >> id;
-						cin.ignore();
-						cout << "Enter actor name: ";
-						string name;
-						getline(cin, name);
-						cout << "Enter actor birth year: ";
-						int birthYear;
-						cin >> birthYear;
-						actorDict.add(id, name, birthYear);
-						
-					}
-					else if (operation == 2) {
-						cout << "Enter movie ID: ";
-						int id;
-						cin >> id;
-						cin.ignore();
-						cout << "Enter movie title: ";
-						string title;
-						getline(cin, title);
-						cout << "Enter movie year: ";
-						int year;
-						cin >> year;
-						movieDict.add(id, title, year);
-						
-					}
-					else if (operation == 3) {
-						cout << "Enter movie ID: ";
-						int movieId;
-						cin >> movieId;
-						cout << "Enter actor ID: ";
-						int actorId;
-						cin >> actorId;
-						cout << "Enter new movie title: ";
-						string title;
-						cin >> title;
-						cout << "Enter new movie year: ";
-						int year;
-						cin >> year;
-						// Add actor to movie in dictionary method
-					}
-					else if (operation == 4) {
-						cout << "Enter actor ID: ";
-						int id;
-						cin >> id;
-						cin.ignore();
-						cout << "Enter new actor name: ";
-						string name;
-						getline(cin, name);
-						cout << "Enter new actor birth year: ";
-						int birthYear;
-						cin >> birthYear;
-						actorDict.update(id, name, birthYear);
-						
-					}
-					else if (operation == 5) {
-						cout << "Enter movie ID: ";
-						int id;
-						cin >> id;
-						cout << "Enter new movie title: ";
-						string title;
-						cin >> title;
-						cout << "Enter new movie year: ";
-						int year;
-						cin >> year;
-						movieDict.update(id, title, year);
-					}
-				}
-			}
-			else {
-				cout << "Access denied!\n\n";
-			}
-		}
-		else if (choice == 2) {
-			while (true) {
-				cout << "------------------------------------------------------\n";
-				cout << "Operations\n1 - Display actors according to age\n2 - Display movies made within the past 3 years\n3 - Display all movies an actor starred in alphabetical order\n4 - Display all actors in a particular movie in alphabetical order\n5 - Display a list of all actors that a particular actor knows\n0 - Exit\nEnter operation: ";
-				int operation;
-				cin >> operation;
-				if (operation == 0) {
-					break;
-				}
-				else if (operation == 1) {
-					cout << "Enter starting age (inclusive): ";
-					int age1;
-					cin >> age1;
-					cout << "Enter ending age (inclusive): ";
-					int age2;
-					cin >> age2;
-				}
-				else if (operation == 2) {
-					// Display movies made within the past 3 years method
-				}
-				else if (operation == 3) {
-					cout << "Enter actor ID: ";
-					int id;
-					cin >> id;
-				}
-				else if (operation == 4) {
-					cout << "Enter movie ID: ";
-					int id;
-					cin >> id;
-				}
-				else if (operation == 5) {
-					cout << "Enter actor ID: ";
-					int id;
-					cin >> id;
-				}
-			}
-		}
-		else if (choice == 0) {
-			return 1;
-		}
-	}
+void importActorCSV(const string& filename, Graph& graph);
+void importMovieCSV(const string& filename, Graph& graph);
+void importCastCSV(const string& filename, Graph& graph);
+void appendActorToCSV(const string& filename, int id, const string& name, int birthYear);
 
-	return 0;
+int main() {
+    Graph movieGraph;
+
+    // Check if files exist before starting import
+    cout << "Checking data files..." << endl;
+    if (!ifstream("./data/actors.csv")) {
+        cout << "Error: actors.csv not found" << endl;
+        return 1;
+    }
+    if (!ifstream("./data/movies.csv")) {
+        cout << "Error: movies.csv not found" << endl;
+        return 1;
+    }
+    if (!ifstream("./data/cast.csv")) {
+        cout << "Error: cast.csv not found" << endl;
+        return 1;
+    }
+
+    cout << "Importing data..." << endl;
+    importActorCSV("./data/actors.csv", movieGraph);
+    cout << "Actors imported successfully" << endl;
+    importMovieCSV("./data/movies.csv", movieGraph);
+    cout << "Movies imported successfully" << endl;
+    importCastCSV("./data/cast.csv", movieGraph);
+    cout << "Cast imported successfully" << endl;
+
+    while (true) {
+        cout << "\n----------------------MOVIE WIKI----------------------\n";
+        cout << "Welcome to Movie Wiki! This program allows you to add, update, and track movies and actors.\n";
+        cout << "1 - Administrator access \n2 - User access\n0 - Exit\nEnter access: ";
+        int choice;
+        cin >> choice;
+
+        if (choice == 0) break;
+
+        if (choice == 1) {
+            cout << "Enter admin password: ";
+            string password;
+            cin >> password;
+
+            if (password == "admin123") {
+                cout << "Access granted!\n------------------------------------------------------\n";
+                while (true) {
+                    cout << "\nOperations\n1 - Add new actor\n2 - Add new movie\n"
+                        << "3 - Add an actor to a movie\n4 - Update actor details\n"
+                        << "5 - Update movie details\n0 - Exit\nEnter operation: ";
+                    int operation;
+                    cin >> operation;
+
+                    if (operation == 0) break;
+
+                    if (operation == 1) {
+                        cout << "Enter actor ID: ";
+                        int id;
+                        cin >> id;
+                        cin.ignore();
+                        cout << "Enter actor name: ";
+                        string name;
+                        getline(cin, name);
+                        cout << "Enter actor birth year: ";
+                        int birthYear;
+                        cin >> birthYear;
+
+                        if (movieGraph.addVertex(id, name, birthYear, true)) {
+                            appendActorToCSV("actors.csv", id, name, birthYear);
+                            cout << "Actor added successfully!\n";
+                        }
+                        else {
+                            cout << "Failed to add actor. ID may already exist.\n";
+                        }
+                    }
+                    else if (operation == 2) {
+                        cout << "Enter movie ID: ";
+                        int id;
+                        cin >> id;
+                        cin.ignore();
+                        cout << "Enter movie title: ";
+                        string title;
+                        getline(cin, title);
+                        cout << "Enter release year: ";
+                        int year;
+                        cin >> year;
+                        cin.ignore();
+                        cout << "Enter movie plot: ";
+                        string plot;
+                        getline(cin, plot);
+
+                        if (movieGraph.addVertex(id, title, year, false, plot)) {
+                            cout << "Movie added successfully!\n";
+                        }
+                        else {
+                            cout << "Failed to add movie. ID may already exist.\n";
+                        }
+                    }
+                    else if (operation == 3) {
+                        cout << "Enter actor ID: ";
+                        int actorId;
+                        cin >> actorId;
+                        cout << "Enter movie ID: ";
+                        int movieId;
+                        cin >> movieId;
+
+                        if (movieGraph.addEdge(actorId, movieId)) {
+                            cout << "Actor added to movie successfully!\n";
+                        }
+                        else {
+                            cout << "Failed to add actor to movie. Please check IDs.\n";
+                        }
+                    }
+                    else if (operation == 4) {
+                        cout << "Enter actor ID to update: ";
+                        int id;
+                        cin >> id;
+                        cin.ignore();
+                        cout << "Enter new name (or press Enter to skip): ";
+                        string name;
+                        getline(cin, name);
+                        cout << "Enter new birth year (or 0 to skip): ";
+                        int birthYear;
+                        cin >> birthYear;
+
+                        auto vertex = movieGraph.findVertex(id, true);
+                        if (vertex) {
+                            if (!name.empty()) vertex->name = name;
+                            if (birthYear != 0) vertex->value = birthYear;
+                            cout << "Actor updated successfully!\n";
+                        }
+                        else {
+                            cout << "Actor not found.\n";
+                        }
+                    }
+                    else if (operation == 5) {
+                        cout << "Enter movie ID to update: ";
+                        int id;
+                        cin >> id;
+                        cin.ignore();
+                        cout << "Enter new title (or press Enter to skip): ";
+                        string title;
+                        getline(cin, title);
+                        cout << "Enter new year (or 0 to skip): ";
+                        int year;
+                        cin >> year;
+                        cin.ignore();
+                        cout << "Enter new plot (or press Enter to skip): ";
+                        string plot;
+                        getline(cin, plot);
+
+                        auto vertex = movieGraph.findVertex(id, false);
+                        if (vertex) {
+                            if (!title.empty()) vertex->name = title;
+                            if (year != 0) vertex->value = year;
+                            if (!plot.empty()) vertex->plot = plot;
+                            cout << "Movie updated successfully!\n";
+                        }
+                        else {
+                            cout << "Movie not found.\n";
+                        }
+                    }
+                }
+            }
+            else {
+                cout << "Access denied!\n";
+            }
+        }
+        else if (choice == 2) {
+            while (true) {
+                cout << "\n------------------------------------------------------\n";
+                cout << "Operations\n1 - Display actors according to age\n"
+                    << "2 - Display movies made within the past 3 years\n"
+                    << "3 - Display all movies an actor starred in alphabetical order\n"
+                    << "4 - Display all actors in a particular movie in alphabetical order\n"
+                    << "5 - Display a list of all actors that a particular actor knows\n"
+                    << "0 - Exit\nEnter operation: ";
+                int operation;
+                cin >> operation;
+
+                if (operation == 0) break;
+
+                if (operation == 1) {
+                    cout << "Enter starting age (inclusive): ";
+                    int age1;
+                    cin >> age1;
+                    cout << "Enter ending age (inclusive): ";
+                    int age2;
+                    cin >> age2;
+                    movieGraph.displayActorsByAge(age1, age2);
+                }
+                else if (operation == 2) {
+                    movieGraph.displayRecentMovies(2024);
+                }
+                else if (operation == 3) {
+                    cout << "Enter actor ID: ";
+                    int actorId;
+                    cin >> actorId;
+                    movieGraph.displayActorMovies(actorId);
+                }
+                else if (operation == 4) {
+                    cout << "Enter movie ID: ";
+                    int movieId;
+                    cin >> movieId;
+                    movieGraph.displayMovieCast(movieId);
+                }
+                else if (operation == 5) {
+                    cout << "Enter actor ID: ";
+                    int actorId;
+                    cin >> actorId;
+                    movieGraph.displayActorNetwork(actorId);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void importActorCSV(const string& filename, Graph& graph) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file " << filename << endl;
+        return;
+    }
+
+    string line;
+    getline(file, line); // Skip header
+    int count = 0;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string idStr, name, birthStr;
+
+        getline(ss, idStr, ',');
+        getline(ss, name, ',');
+        getline(ss, birthStr, ',');
+
+        if (!name.empty() && name[0] == '"' && name[name.size() - 1] == '"') {
+            name = name.substr(1, name.size() - 2);
+        }
+
+        try {
+            int id = stoi(idStr);
+            int birth = stoi(birthStr);
+            if (graph.addVertex(id, name, birth, true)) {
+                count++;
+                if (count % 100 == 0) {
+                    cout << "Processed " << count << " actors...\r";
+                }
+            }
+        }
+        catch (const invalid_argument& e) {
+            cout << "Skipping invalid row: " << line << endl;
+        }
+    }
+    cout << "Imported " << count << " actors successfully." << endl;
+    file.close();
+}
+
+void importMovieCSV(const string& filename, Graph& graph) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file " << filename << endl;
+        return;
+    }
+
+    string line;
+    getline(file, line); // Skip header
+    int count = 0;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string idStr, title, plot, yearStr;
+
+        if (!getline(ss, idStr, ',')) continue;
+        if (!getline(ss, title, ',')) continue;
+
+        if (title.front() == '"') {
+            string extra;
+            while (getline(ss, extra, ',')) {
+                title += ',' + extra;
+                if (title.back() == '"') break;
+            }
+            title = title.substr(1, title.length() - 2);
+        }
+
+        if (!getline(ss, plot, ',')) continue;
+        if (plot.front() == '"') {
+            string extra;
+            while (getline(ss, extra, ',')) {
+                plot += ',' + extra;
+                if (plot.back() == '"') break;
+            }
+            plot = plot.substr(1, plot.length() - 2);
+        }
+
+        if (!getline(ss, yearStr)) continue;
+
+        try {
+            int id = stoi(idStr);
+            int year = stoi(yearStr);
+            if (graph.addVertex(id, title, year, false, plot)) {
+                count++;
+                if (count % 100 == 0) {
+                    cout << "Processed " << count << " movies...\r";
+                }
+            }
+        }
+        catch (const exception& e) {
+            cout << "Error processing movie: " << idStr << " - " << e.what() << endl;
+        }
+    }
+    cout << "Imported " << count << " movies successfully." << endl;
+    file.close();
+}
+
+void importCastCSV(const string& filename, Graph& graph) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file " << filename << endl;
+        return;
+    }
+
+    string line;
+    getline(file, line); // Skip header
+    int count = 0;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string actorIdStr, movieIdStr;
+
+        getline(ss, actorIdStr, ',');
+        getline(ss, movieIdStr, ',');
+
+        try {
+            int actorId = stoi(actorIdStr);
+            int movieId = stoi(movieIdStr);
+            if (graph.addEdge(actorId, movieId)) {
+                count++;
+                if (count % 100 == 0) {
+                    cout << "Processed " << count << " cast relationships...\r";
+                }
+            }
+        }
+        catch (const invalid_argument& e) {
+            cout << "Skipping invalid cast row: " << line << endl;
+        }
+    }
+    cout << "Imported " << count << " cast relationships successfully." << endl;
+    file.close();
+}
+
+void appendActorToCSV(const string& filename, int id, const string& name, int birthYear) {
+    ofstream file(filename, ios::app);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file " << filename << endl;
+        cout << "Actor was not able to be added successfully.\n";
+        return;
+    }
+
+    file << id << ",\"" << name << "\"," << birthYear << "\n";
+    file.close();
+    cout << "Actor successfully added to " << filename << endl;
 }
