@@ -17,25 +17,25 @@ int main() {
 
     // Check if files exist before starting import
     cout << "Checking data files..." << endl;
-    if (!ifstream("./data/actors.csv")) {
+    if (!ifstream("actors.csv")) {
         cout << "Error: actors.csv not found" << endl;
         return 1;
     }
-    if (!ifstream("./data/movies.csv")) {
+    if (!ifstream("movies.csv")) {
         cout << "Error: movies.csv not found" << endl;
         return 1;
     }
-    if (!ifstream("./data/cast.csv")) {
+    if (!ifstream("cast.csv")) {
         cout << "Error: cast.csv not found" << endl;
         return 1;
     }
 
     cout << "Importing data..." << endl;
-    importActorCSV("./data/actors.csv", movieGraph);
+    importActorCSV("actors.csv", movieGraph);
     cout << "Actors imported successfully" << endl;
-    importMovieCSV("./data/movies.csv", movieGraph);
+    importMovieCSV("movies.csv", movieGraph);
     cout << "Movies imported successfully" << endl;
-    importCastCSV("./data/cast.csv", movieGraph);
+    importCastCSV("cast.csv", movieGraph);
     cout << "Cast imported successfully" << endl;
 
     while (true) {
