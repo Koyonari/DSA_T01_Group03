@@ -92,158 +92,100 @@ int Dictionary::hash(int key) {
 
 
 
-bool Dictionary::add(int key, string name, int value) {
+// For actors
+bool Dictionary::addActor(int key, string name, int birthYear) {
+    if (!isActorDict) return false;
 
     int index = hash(key);
-
-    if (isActorDict) {
-
-        // Check if key exists in actor chain
-
-        ActorNode* current = actorItems[index];
-
-        while (current != nullptr) {
-
-            if (current->key == key) return false;
-
-            current = current->next;
-
-        }
-
-
-
-        // Create new actor node
-
-        ActorNode* newNode = new ActorNode;
-
-        newNode->key = key;
-
-        Actor* newActor = new Actor;
-
-        newActor->id = key;
-
-        newActor->name = name;
-
-        newActor->birthYear = value;
-
-        newNode->actor = newActor;
-
-        newNode->next = actorItems[index];
-
-        actorItems[index] = newNode;
-
-
-
-        // Add to relationship graph
-
-        relationshipGraph->addVertex(key, name, value, true);
-
+    // Check if key exists in actor chain
+    ActorNode* current = actorItems[index];
+    while (current != nullptr) {
+        if (current->key == key) return false;
+        current = current->next;
     }
 
-    else {
+    // Create new actor node
+    ActorNode* newNode = new ActorNode;
+    newNode->key = key;
+    Actor* newActor = new Actor;
+    newActor->id = key;
+    newActor->name = name;
+    newActor->birthYear = birthYear;
+    newNode->actor = newActor;
+    newNode->next = actorItems[index];
+    actorItems[index] = newNode;
 
-        // Check if key exists in movie chain
-
-        MovieNode* current = movieItems[index];
-
-        while (current != nullptr) {
-
-            if (current->key == key) return false;
-
-            current = current->next;
-
-        }
-
-
-
-        // Create new movie node
-
-        MovieNode* newNode = new MovieNode;
-
-        newNode->key = key;
-
-        Movie* newMovie = new Movie;
-
-        newMovie->id = key;
-
-        newMovie->title = name;
-
-        newMovie->year = value;
-
-        newNode->movie = newMovie;
-
-        newNode->next = movieItems[index];
-
-        movieItems[index] = newNode;
-
-
-
-        // Add to relationship graph
-
-        relationshipGraph->addVertex(key, name, value, false);
-
-    }
+    // Add to relationship graph
+    relationshipGraph->addActor(key, name, birthYear);
 
     size++;
-
     return true;
-
 }
 
-
-
-bool Dictionary::update(int key, string name, int value) {
+// For movies
+bool Dictionary::addMovie(int key, string title, int year, string plot) {
+    if (isActorDict) return false;
 
     int index = hash(key);
-
-    if (isActorDict) {
-
-        ActorNode* current = actorItems[index];
-
-        while (current != nullptr) {
-
-            if (current->key == key) {
-
-                current->actor->name = name;
-
-                current->actor->birthYear = value;
-
-                return true;
-
-            }
-
-            current = current->next;
-
-        }
-
+    // Check if key exists in movie chain
+    MovieNode* current = movieItems[index];
+    while (current != nullptr) {
+        if (current->key == key) return false;
+        current = current->next;
     }
 
-    else {
+    // Create new movie node
+    MovieNode* newNode = new MovieNode;
+    newNode->key = key;
+    Movie* newMovie = new Movie;
+    newMovie->id = key;
+    newMovie->title = title;
+    newMovie->year = year;
+    newMovie->plot = plot;
+    newNode->movie = newMovie;
+    newNode->next = movieItems[index];
+    movieItems[index] = newNode;
 
-        MovieNode* current = movieItems[index];
+    // Add to relationship graph
+    relationshipGraph->addMovie(key, title, year, plot);
 
-        while (current != nullptr) {
-
-            if (current->key == key) {
-
-                current->movie->title = name;
-
-                current->movie->year = value;
-
-                return true;
-
-            }
-
-            current = current->next;
-
-        }
-
-    }
-
-    return false;
-
+    size++;
+    return true;
 }
 
+// Update functions
+bool Dictionary::updateActor(int key, string name, int birthYear) {
+    if (!isActorDict) return false;
+
+    int index = hash(key);
+    ActorNode* current = actorItems[index];
+    while (current != nullptr) {
+        if (current->key == key) {
+            current->actor->name = name;
+            current->actor->birthYear = birthYear;
+            return true;
+        }
+        current = current->next;
+    }
+    return false;
+}
+
+bool Dictionary::updateMovie(int key, string title, int year, string plot) {
+    if (isActorDict) return false;
+
+    int index = hash(key);
+    MovieNode* current = movieItems[index];
+    while (current != nullptr) {
+        if (current->key == key) {
+            current->movie->title = title;
+            current->movie->year = year;
+            current->movie->plot = plot;
+            return true;
+        }
+        current = current->next;
+    }
+    return false;
+}
 
 
 Actor* Dictionary::getActor(int key) {

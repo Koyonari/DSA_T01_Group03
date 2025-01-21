@@ -28,6 +28,8 @@ struct Movie {
 
     string title;
 
+    string plot;
+
     int year;
 
 };
@@ -85,14 +87,17 @@ private:
 
 
 public:
-
     Dictionary(bool isActor, Graph* graph);
 
     ~Dictionary();
 
-    bool add(int key, string name, int value);
+    bool addActor(int key, string name, int birthYear);
 
-    bool update(int key, string name, int value);
+    bool addMovie(int key, string title, int year, string plot);
+
+    bool updateActor(int key, string name, int birthYear);
+
+    bool updateMovie(int key, string title, int year, string plot);
 
     void remove(int key);
 
@@ -105,5 +110,4 @@ public:
     int getLength();
 
     void print();
-
 };

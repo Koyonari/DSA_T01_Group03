@@ -222,7 +222,7 @@ void importActorCSV(const string& filename, Graph& graph) {
         try {
             int id = stoi(idStr);
             int birth = stoi(birthStr);
-            if (graph.addVertex(id, name, birth, true)) {
+            if (graph.addActor(id, name, birth)) {
                 count++;
                 if (count % 100 == 0) {
                     cout << "Processed " << count << " actors...\r";
@@ -312,7 +312,7 @@ void importMovieCSV(const string& filename, Graph& graph) {
         }
 
         // Add to graph (false indicates it's a movie, not an actor)
-        if (graph.addVertex(id, title, year, false, plot)) {
+        if (graph.addMovie(id, title, year, plot)) {
             count++;
             if (count % 100 == 0) {
                 cout << "Processed " << count << " movies...\r";
@@ -399,7 +399,7 @@ void importCastCSV(const string& filename, Graph& graph) {
 }
 
 void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph) {
-    if (graph.addVertex(id, name, birthYear, true)) { //add actor to the graph
+    if (graph.addActor(id, name, birthYear)) { //add actor to the graph
         ofstream file(filename, ios::app);
         if (!file.is_open()) {
             cout << "Error: Could not open file " << filename << endl;
@@ -417,7 +417,7 @@ void appendActorToCSV(const string& filename, int id, const string& name, int bi
 }
 
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph) {
-    auto actor = graph.findVertex(id, true);   //update the graph also
+    auto actor = graph.findActor(id);   //update the graph also
     if (actor) {
         actor->name = newName;
         actor->value = newBirthYear;  
@@ -501,7 +501,7 @@ void appendCastToCSV(const string& filename, int actorid, int movieid, Graph& gr
 }
 
 void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph) {
-    auto movie = graph.findVertex(id, false); // Update the graph also
+    auto movie = graph.findMovie(id); // Update the graph also
     if (movie) {
         if (!newTitle.empty()) movie->name = newTitle;
         if (newYear != 0) movie->value = newYear;
@@ -570,7 +570,7 @@ void updateMovieInCSV(const string& filename, int id, const string& newTitle, in
 }
 
 void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph) {
-    if (graph.addVertex(id, title, year, false, plot)) { // Add movie to the graph
+    if (graph.addMovie(id, title, year, plot)) { // Add movie to the graph
         ofstream file(filename, ios::app);
         if (!file.is_open()) {
             cout << "Error: Could not open file " << filename << endl;

@@ -2,26 +2,45 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 
-Graph::Graph() : numVertices(0) {
+Graph::Graph() : numActors(0), numMovies(0) {
     for (int i = 0; i < MAX_VERTICES; i++) {
-        vertices[i] = nullptr;
+        actorVertices[i] = nullptr;
+        movieVertices[i] = nullptr;
     }
 }
 
 Graph::~Graph() {
+    // Clean up actors
     for (int i = 0; i < MAX_VERTICES; i++) {
-        Vertex* currentVertex = vertices[i];
-        while (currentVertex != nullptr) {
-            Edge* currentEdge = currentVertex->edges;
+        Vertex* currentActor = actorVertices[i];
+        while (currentActor != nullptr) {
+            Edge* currentEdge = currentActor->edges;
             while (currentEdge != nullptr) {
                 Edge* nextEdge = currentEdge->next;
                 delete currentEdge;
                 currentEdge = nextEdge;
             }
-            Vertex* nextVertex = currentVertex->next;
-            delete currentVertex;
-            currentVertex = nextVertex;
+            Vertex* nextActor = currentActor->next;
+            delete currentActor;
+            currentActor = nextActor;
+        }
+    }
+
+    // Clean up movies
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        Vertex* currentMovie = movieVertices[i];
+        while (currentMovie != nullptr) {
+            Edge* currentEdge = currentMovie->edges;
+            while (currentEdge != nullptr) {
+                Edge* nextEdge = currentEdge->next;
+                delete currentEdge;
+                currentEdge = nextEdge;
+            }
+            Vertex* nextMovie = currentMovie->next;
+            delete currentMovie;
+            currentMovie = nextMovie;
         }
     }
 }
@@ -30,11 +49,11 @@ int Graph::hash(int key) {
     return key % MAX_VERTICES;
 }
 
-Graph::Vertex* Graph::findVertex(int id, bool isActor) {
+Graph::Vertex* Graph::findActor(int id) {
     int index = hash(id);
-    Vertex* current = vertices[index];
+    Vertex* current = actorVertices[index];
     while (current != nullptr) {
-        if (current->id == id && current->isActor == isActor) {
+        if (current->id == id) {
             return current;
         }
         current = current->next;
@@ -42,34 +61,63 @@ Graph::Vertex* Graph::findVertex(int id, bool isActor) {
     return nullptr;
 }
 
-bool Graph::addVertex(int id, string name, int value, bool isActor, string plot) {
-    if (findVertex(id, isActor) != nullptr) {
-        return false;  // Vertex already exists
+Graph::Vertex* Graph::findMovie(int id) {
+    int index = hash(id);
+    Vertex* current = movieVertices[index];
+    while (current != nullptr) {
+        if (current->id == id) {
+            return current;
+        }
+        current = current->next;
+    }
+    return nullptr;
+}
+
+bool Graph::addActor(int id, string name, int birthYear) {
+    if (findActor(id) != nullptr) {
+        return false;  // Actor already exists
     }
 
     int index = hash(id);
     Vertex* newVertex = new Vertex;
     newVertex->id = id;
-    newVertex->isActor = isActor;
     newVertex->name = name;
-    newVertex->value = value;
+    newVertex->value = birthYear;
+    newVertex->plot = "";
+    newVertex->edges = nullptr;
+    newVertex->next = actorVertices[index];
+    actorVertices[index] = newVertex;
+    numActors++;
+    return true;
+}
+
+bool Graph::addMovie(int id, string title, int year, string plot) {
+    if (findMovie(id) != nullptr) {
+        return false;  // Movie already exists
+    }
+
+    int index = hash(id);
+    Vertex* newVertex = new Vertex;
+    newVertex->id = id;
+    newVertex->name = title;
+    newVertex->value = year;
     newVertex->plot = plot;
     newVertex->edges = nullptr;
-    newVertex->next = vertices[index];
-    vertices[index] = newVertex;
-    numVertices++;
+    newVertex->next = movieVertices[index];
+    movieVertices[index] = newVertex;
+    numMovies++;
     return true;
 }
 
 bool Graph::addEdge(int actorId, int movieId) {
-    Vertex* actor = findVertex(actorId, true);
-    Vertex* movie = findVertex(movieId, false);
+    Vertex* actor = findActor(actorId);
+    Vertex* movie = findMovie(movieId);
 
     if (!actor || !movie) {
         return false;
     }
 
-    // Check if edge already exists
+    // Check if edge already exists in actor's edges
     Edge* current = actor->edges;
     while (current != nullptr) {
         if (current->destId == movieId) {
@@ -175,13 +223,11 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
     vector<pair<string, int>> matchingActors;
 
     for (int i = 0; i < MAX_VERTICES; i++) {
-        Vertex* current = vertices[i];
+        Vertex* current = actorVertices[i];
         while (current != nullptr) {
-            if (current->isActor) {
-                int age = currentYear - current->value;
-                if (age >= startAge && age <= endAge) {
-                    matchingActors.push_back(make_pair(current->name, age));
-                }
+            int age = currentYear - current->value;
+            if (age >= startAge && age <= endAge) {
+                matchingActors.push_back(make_pair(current->name, age));
             }
             current = current->next;
         }
@@ -192,7 +238,6 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
         return;
     }
 
-    // Sort using quick sort
     if (matchingActors.size() > 1) {
         quickSort(matchingActors, 0, matchingActors.size() - 1);
     }
@@ -206,15 +251,14 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
     cout << "----------------------------------------" << endl;
     cout << "Total actors found: " << matchingActors.size() << endl;
 }
-
 void Graph::displayRecentMovies(int currentYear) {
     vector<MovieInfo> recentMovies;
 
     // Collect recent movies from all buckets
     for (int i = 0; i < MAX_VERTICES; i++) {
-        Vertex* current = vertices[i];
+        Vertex* current = movieVertices[i];
         while (current != nullptr) {
-            if (!current->isActor && (currentYear - current->value) <= 3) {
+            if ((currentYear - current->value) <= 3) {
                 recentMovies.emplace_back(current->name, current->value, current->plot);
             }
             current = current->next;
@@ -240,7 +284,7 @@ void Graph::displayRecentMovies(int currentYear) {
 }
 
 void Graph::displayActorMovies(int actorId) {
-    Vertex* actor = findVertex(actorId, true);
+    Vertex* actor = findActor(actorId);
     if (!actor) {
         cout << "Actor not found.\n";
         return;
@@ -251,7 +295,7 @@ void Graph::displayActorMovies(int actorId) {
 
     // Collect all movies the actor has starred in
     while (current != nullptr) {
-        Vertex* movie = findVertex(current->destId, false);
+        Vertex* movie = findMovie(current->destId);
         if (movie) {
             movies.push_back(movie->name);
         }
@@ -276,7 +320,7 @@ void Graph::displayActorMovies(int actorId) {
 }
 
 void Graph::displayMovieCast(int movieId) {
-    Vertex* movie = findVertex(movieId, false);
+    Vertex* movie = findMovie(movieId);
     if (!movie) {
         cout << "Movie not found.\n";
         return;
@@ -287,7 +331,7 @@ void Graph::displayMovieCast(int movieId) {
 
     // Collect all actors in the movie
     while (current != nullptr) {
-        Vertex* actor = findVertex(current->destId, true);
+        Vertex* actor = findActor(current->destId);
         if (actor) {
             actors.push_back(actor->name);
         }
@@ -312,7 +356,7 @@ void Graph::displayMovieCast(int movieId) {
 }
 
 void Graph::displayActorNetwork(int actorId) {
-    Vertex* actor = findVertex(actorId, true);
+    Vertex* actor = findActor(actorId);
     if (!actor) {
         cout << "Actor not found.\n";
         return;
@@ -323,13 +367,13 @@ void Graph::displayActorNetwork(int actorId) {
 
     // For each movie the actor was in
     while (movieEdge != nullptr) {
-        Vertex* movie = findVertex(movieEdge->destId, false);
+        Vertex* movie = findMovie(movieEdge->destId);
         if (movie) {
             Edge* castEdge = movie->edges;
             // For each actor in that movie
             while (castEdge != nullptr) {
                 if (castEdge->destId != actorId) {  // Don't include the original actor
-                    Vertex* coActor = findVertex(castEdge->destId, true);
+                    Vertex* coActor = findActor(castEdge->destId);
                     if (coActor) {
                         // Only add if not already in the list
                         if (find(coActors.begin(), coActors.end(), coActor->name) == coActors.end()) {
