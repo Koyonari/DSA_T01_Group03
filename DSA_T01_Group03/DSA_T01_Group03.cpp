@@ -386,7 +386,7 @@ void importCastCSV(const string& filename, Graph& graph) {
         if (graph.addEdge(actorId, movieId)) {
             count++;
             if (count % 100 == 0) {
-                cout << "Processed " << count << " cast relationships...\r";
+               cout << "Processed " << count << " cast relationships...\r";
             }
         }
 
@@ -420,7 +420,7 @@ void updateActorInCSV(const string& filename, int id, const string& newName, int
     auto actor = graph.findActor(id);   //update the graph also
     if (actor) {
         actor->name = newName;
-        actor->value = newBirthYear;  
+        actor->birthYear = newBirthYear;  
 
         ifstream inFile(filename);
         ofstream tempFile("temp.csv");
@@ -503,8 +503,8 @@ void appendCastToCSV(const string& filename, int actorid, int movieid, Graph& gr
 void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph) {
     auto movie = graph.findMovie(id); // Update the graph also
     if (movie) {
-        if (!newTitle.empty()) movie->name = newTitle;
-        if (newYear != 0) movie->value = newYear;
+        if (!newTitle.empty()) movie->title = newTitle;
+        if (newYear != 0) movie->year = newYear;
         if (!newPlot.empty()) movie->plot = newPlot;
 
         ifstream inFile(filename);

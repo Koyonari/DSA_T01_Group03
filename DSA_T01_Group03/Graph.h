@@ -1,7 +1,10 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Dictionary.h"
 using namespace std;
+
+class Dictionary;
 
 struct MovieInfo {
     string title;
@@ -15,29 +18,8 @@ struct MovieInfo {
 
 class Graph {
 private:
-    static const int MAX_VERTICES = 150;  // Size for each dictionary
-
-    struct Edge {
-        int destId;
-        Edge* next;
-    };
-
-    struct Vertex {
-        int id;
-        string name;   // actor name or movie title
-        int value;     // birth year for actors, release year for movies
-        string plot;   // movie plot (empty for actors)
-        Edge* edges;   // linked list of connections
-        Vertex* next;  // for hash table chaining
-    };
-
-    // Separate hash tables for actors and movies
-    Vertex* actorVertices[MAX_VERTICES];
-    Vertex* movieVertices[MAX_VERTICES];
-    int numActors;
-    int numMovies;
-
-    int hash(int key);
+    Dictionary* actorDict;
+    Dictionary* movieDict;
 
     // Sorting helper functions
     void quickSort(vector<pair<string, int>>& arr, size_t low, size_t high);
@@ -51,8 +33,8 @@ public:
     Graph();
     ~Graph();
 
-    Vertex* findActor(int id);
-    Vertex* findMovie(int id);
+    Actor* findActor(int id);
+    Movie* findMovie(int id);
     bool addActor(int id, string name, int birthYear);
     bool addMovie(int id, string title, int year, string plot);
     bool addEdge(int actorId, int movieId);
