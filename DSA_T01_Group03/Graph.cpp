@@ -113,9 +113,12 @@ void Graph::merge(vector<MovieInfo>& arr, size_t left, size_t mid, size_t right)
 }
 
 void Graph::displayActorsByAge(int startAge, int endAge) {
+    int currentYear;
+    cout << "Enter the current year: ";
+    cin >> currentYear;
+
     vector<Actor*> allActors = actorDict->getAllActors();
     vector<pair<string, int>> matchingActors;
-    int currentYear = 2024;
 
     // Filter actors by age
     for (Actor* actor : allActors) {
@@ -145,13 +148,17 @@ void Graph::displayActorsByAge(int startAge, int endAge) {
     cout << "Total actors found: " << matchingActors.size() << endl;
 }
 
-void Graph::displayRecentMovies(int currentYear) {
+void Graph::displayRecentMovies() {
+    int currentYear;
+    cout << "Enter the current year: ";
+    cin >> currentYear;
+
     vector<Movie*> allMovies = movieDict->getAllMovies();
     vector<MovieInfo> recentMovies;
 
-    // Filter recent movies
     for (Movie* movie : allMovies) {
-        if ((currentYear - movie->year) <= 3) {
+        int yearDiff = currentYear - movie->year;
+        if (yearDiff >= 0 && yearDiff <= 3) {
             recentMovies.emplace_back(movie->title, movie->year, movie->plot);
         }
     }
@@ -162,9 +169,7 @@ void Graph::displayRecentMovies(int currentYear) {
     }
 
     // Sort by year
-    if (recentMovies.size() > 1) {
-        mergeSort(recentMovies, 0, recentMovies.size() - 1);
-    }
+    mergeSort(recentMovies, 0, recentMovies.size() - 1);
 
     cout << "\nMovies from the past 3 years:" << endl;
     cout << "----------------------------------------" << endl;

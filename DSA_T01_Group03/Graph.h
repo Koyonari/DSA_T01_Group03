@@ -41,7 +41,7 @@ public:
 
     // Query operations
     void displayActorsByAge(int startAge, int endAge);
-    void displayRecentMovies(int currentYear);
+    void displayRecentMovies();
     void displayActorMovies(int actorId);
     void displayMovieCast(int movieId);
     void displayActorNetwork(int actorId);
