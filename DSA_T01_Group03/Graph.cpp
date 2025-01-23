@@ -2,7 +2,6 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <algorithm>
 
 Graph::Graph() {
     actorDict = new Dictionary(true, this);
