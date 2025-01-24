@@ -170,7 +170,7 @@ int main() {
                     movieGraph.displayActorsByAge(age1, age2);
                 }
                 else if (operation == 2) {
-                    movieGraph.displayRecentMovies(2024);
+                    movieGraph.displayRecentMovies();
                 }
                 else if (operation == 3) {
                     cout << "Enter actor ID: ";
