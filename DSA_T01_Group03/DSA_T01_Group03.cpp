@@ -422,91 +422,87 @@ void updateActorInCSV(const string& filename, int id, const string& newName, int
         if (!newName.empty()) {
             actor->name = newName;
         }
-
         if (newBirthYear != 0) {
             actor->birthYear = newBirthYear;
         }
 
-        fstream file(filename, ios::in | ios::out);
+        ifstream file(filename);
         if (!file.is_open()) {
             cout << "Error: Could not open file" << endl;
             return;
         }
 
+        vector<string> lines;
         string line;
-        streampos pos = 0;
         bool found = false;
 
-        getline(file, line);
+        // Read the header and add it to the list
+        if (getline(file, line)) {
+            lines.push_back(line);  // Add header
+        }
 
+        // Read all lines and store them in memory
         while (getline(file, line)) {
             stringstream ss(line);
-            string idStr, name, birthStr;
-
+            string idStr, existingName, existingBirthYear;
             getline(ss, idStr, ',');
+            getline(ss, existingName, ',');
+            getline(ss, existingBirthYear);
+
             try {
                 int currentId = stoi(idStr);
                 if (currentId == id) {
                     string updatedLine = idStr + ",";
 
-                    if (!newName.empty()) {
-                        updatedLine += newName;
-                    }
-                    else {
-                        getline(ss, name, ',');
-                        updatedLine += name;
-                    }
+                    updatedLine += (!newName.empty() ? newName : existingName);
                     updatedLine += ",";
+                    updatedLine += (newBirthYear != 0 ? to_string(newBirthYear) : existingBirthYear);
 
-                    if (newBirthYear != 0) {
-                        updatedLine += to_string(newBirthYear);
-                    }
-                    else {
-                        getline(ss, birthStr);
-                        updatedLine += birthStr;
-                    }
-
-                    file.seekp(pos);
-                    file << updatedLine << endl;
+                    lines.push_back(updatedLine);  // Add updated line
                     found = true;
-                    break;
+                }
+                else {
+                    lines.push_back(line);  // Keep the original line
                 }
             }
             catch (const invalid_argument& e) {
-                // Skip invalid lines
+                lines.push_back(line);  // Add invalid lines as they are
             }
-
-            pos = file.tellg();
         }
 
         file.close();
 
-        if (found) {
-            cout << "Actor updated in " << filename << " and graph successfully.\n";
-        }
-        else {
+        if (!found) {
             cout << "Actor with ID " << id << " not found in " << filename << ".\n";
+            return;
         }
+
+        // Rewrite the entire CSV file with updated data
+        ofstream outFile(filename);
+        if (!outFile.is_open()) {
+            cout << "Error: Could not open file for writing" << endl;
+            return;
+        }
+
+        for (const string& updatedLine : lines) {
+            outFile << updatedLine << endl;
+        }
+
+        outFile.close();
+        cout << "Actor updated successfully in " << filename << " and graph.\n";
     }
     else {
         cout << "Actor with ID " << id << " not found in the graph.\n";
     }
 }
 
+
 void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph) {
     auto movie = graph.findMovie(id);
     if (movie) {
-        if (!newTitle.empty()) {
-            movie->title = newTitle;
-        }
-
-        if (newYear != 0) {
-            movie->year = newYear;
-        }
-
-        if (!newPlot.empty()) {
-            movie->plot = newPlot;
-        }
+        if (!newTitle.empty()) movie->title = newTitle;
+        if (newYear != 0) movie->year = newYear;
+        if (!newPlot.empty()) movie->plot = newPlot;
 
         fstream file(filename, ios::in | ios::out);
         if (!file.is_open()) {
@@ -514,62 +510,53 @@ void updateMovieInCSV(const string& filename, int id, const string& newTitle, in
             return;
         }
 
-        string line;
-        streampos pos = 0;
+        string line, header;
+        vector<string> lines;
         bool found = false;
 
-        getline(file, line);
+        // Read header
+        getline(file, header);
 
+        // Read and process lines
         while (getline(file, line)) {
-            stringstream ss(line);
-            string idStr, title, plot, yearStr;
+            // Parse line with custom CSV parsing
+            size_t idEnd = line.find(',');
+            int currentId = stoi(line.substr(0, idEnd));
 
-            getline(ss, idStr, ',');
-            try {
-                int currentId = stoi(idStr);
-                if (currentId == id) {
-                    string updatedLine = idStr + ",";
+            if (currentId == id) {
+                // Reconstruct the line with updated values
+                string updatedLine = to_string(id) + ",";
 
-                    if (!newTitle.empty()) {
-                        updatedLine += newTitle;
-                    }
-                    else {
-                        getline(ss, title, ',');
-                        updatedLine += title;
-                    }
-                    updatedLine += ",";
+                // Title
+                updatedLine += (!newTitle.empty() ? newTitle :
+                    line.substr(idEnd + 1, line.find(',', idEnd + 1) - (idEnd + 1))) + ",";
 
-                    if (!newPlot.empty()) {
-                        updatedLine += newPlot;
-                    }
-                    else {
-                        getline(ss, plot, ',');
-                        updatedLine += plot;
-                    }
-                    updatedLine += ",";
+                // Plot
+                size_t plotStart = line.find('"', idEnd);
+                size_t plotEnd = line.find('"', plotStart + 1);
+                string existingPlot = line.substr(plotStart + 1, plotEnd - (plotStart + 1));
+                updatedLine += "\"" + (!newPlot.empty() ? newPlot : existingPlot) + "\",";
 
-                    if (newYear != 0) {
-                        updatedLine += to_string(newYear);
-                    }
-                    else {
-                        getline(ss, yearStr);
-                        updatedLine += yearStr;
-                    }
+                // Year
+                updatedLine += (newYear != 0 ? to_string(newYear) :
+                    line.substr(line.rfind(',') + 1));
 
-                    file.seekp(pos);
-                    file << updatedLine << endl;
-                    found = true;
-                    break;
-                }
+                lines.push_back(updatedLine);
+                found = true;
             }
-            catch (const invalid_argument& e) {
-                // Skip invalid lines
+            else {
+                lines.push_back(line);
             }
-
-            pos = file.tellg();
         }
 
+        // Rewrite the file
         file.close();
+        ofstream outFile(filename);
+        outFile << header << "\n";
+        for (const auto& updatedLine : lines) {
+            outFile << updatedLine << "\n";
+        }
+        outFile.close();
 
         if (found) {
             cout << "Movie updated in " << filename << " and graph successfully.\n";
@@ -582,6 +569,7 @@ void updateMovieInCSV(const string& filename, int id, const string& newTitle, in
         cout << "Movie with ID " << id << " not found in the graph.\n";
     }
 }
+
 
 void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph) {
     if (graph.addMovie(id, title, year, plot)) { // Add movie to the graph
