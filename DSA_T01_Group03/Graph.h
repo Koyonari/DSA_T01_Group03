@@ -35,9 +35,11 @@ public:
 
     Actor* findActor(int id);
     Movie* findMovie(int id);
-    bool addActor(int id, string name, int birthYear);
-    bool addMovie(int id, string title, int year, string plot);
+    bool addActor(int id, string name, int birthYear, double rating, int ratingCount);
+    bool addMovie(int id, string title, int year, string plot, double rating, int ratingCount);
     bool addEdge(int actorId, int movieId);
+    bool updateActorRating(int key, double rating);
+    bool updateMovieRating(int key, double rating);
 
     // Query operations
     void displayActorsByAge(int startAge, int endAge);

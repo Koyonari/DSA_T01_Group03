@@ -13,6 +13,14 @@ Graph::~Graph() {
     delete movieDict;
 }
 
+bool Graph::updateActorRating(int key, double rating) {
+    return actorDict->updateActorRating(key, rating);
+}
+
+bool Graph::updateMovieRating(int key, double rating) {
+    return movieDict->updateMovieRating(key, rating);
+}
+
 Actor* Graph::findActor(int id) {
     return actorDict->getActor(id);
 }
@@ -21,12 +29,12 @@ Movie* Graph::findMovie(int id) {
     return movieDict->getMovie(id);
 }
 
-bool Graph::addActor(int id, string name, int birthYear) {
-    return actorDict->addActor(id, name, birthYear);
+bool Graph::addActor(int id, string name, int birthYear, double rating, int ratingCount) {
+    return actorDict->addActor(id, name, birthYear, rating, ratingCount);
 }
 
-bool Graph::addMovie(int id, string title, int year, string plot) {
-    return movieDict->addMovie(id, title, year, plot);
+bool Graph::addMovie(int id, string title, int year, string plot, double rating, int ratingCount) {
+    return movieDict->addMovie(id, title, year, plot, rating, ratingCount);
 }
 
 bool Graph::addEdge(int actorId, int movieId) {
@@ -299,3 +307,4 @@ void Graph::displayActorNetwork(int actorId) {
         cout << "- " << coActor << "\n";
     }
 }
+

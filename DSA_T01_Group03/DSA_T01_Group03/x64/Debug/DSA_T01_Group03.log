@@ -1,4 +1,5 @@
 ﻿  DSA_T01_Group03.cpp
-C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\DSA_T01_Group03.cpp(232,40): warning C4101: 'e': unreferenced local variable
-C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\DSA_T01_Group03.cpp(468,44): warning C4101: 'e': unreferenced local variable
+C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\DSA_T01_Group03.cpp(268,44): warning C4101: 'e': unreferenced local variable
+C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\DSA_T01_Group03.cpp(359,44): warning C4101: 'e': unreferenced local variable
+C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\DSA_T01_Group03.cpp(714,44): warning C4101: 'e': unreferenced local variable
   DSA_T01_Group03.vcxproj -> C:\Users\Brandon\Documents\Y2S2\DSA\asg\DSA_T01_Group03\x64\Debug\DSA_T01_Group03.exe

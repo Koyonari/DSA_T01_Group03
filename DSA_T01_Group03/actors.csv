@@ -1,21 +1,21 @@
-id,name,birth
-102,John Cena,1977
-129,Tom Cruise,1962
-144,Cary Elwes,1962
-158,Tom Hanks,1956
-1597,Mandy Patinkin,1952
-163,Dustin Hoffman,1937
-1697,Chris Sarandon,1942
-193,Henry Cavill,1986
-1834,Jack Nicholson,1937
-200,Bill Paxton,1955
-398,Sally Field,1946
-420,Valeria Golino,1965
-596520,Gerald R. Molen,1935
-641,Gary Sinise,1955
-705,Robin Wright,1966
-914612,Emma Watson,1990
-210,Kevin Bacon,1958
-456,Lee Jung-Jae,1972
-24,Noel Gallagher,1967
-1987,Mark Hamill,1974
+id,name,birth,,
+102,John Cena,1977,0,0
+129,Tom Cruise,1962,0,0
+144,Cary Elwes,1962,0,0
+158,Tom Hanks,1956,0,0
+1597,Mandy Patinkin,1952,0,0
+163,Dustin Hoffman,1937,0,0
+1697,Chris Sarandon,1942,0,0
+193,Henry Cavill,1986,0,0
+1834,Jack Nicholson,1937,0,0
+200,Bill Paxton,1955,0,0
+398,Sally Field,1946,0,0
+420,Valeria Golino,1965,0,0
+596520,Gerald R. Molen,1935,0,0
+641,Gary Sinise,1955,0,0
+705,Robin Wright,1966,0,0
+914612,Emma Watson,1990,0,0
+210,Kevin Bacon,1958,0,0
+456,Lee Jung-Jae,1972,4.333333,3
+24,Noel Gallagher,1967,5.000000,1
+1987,Mark Hamill,1974,3.000000,1

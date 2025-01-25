@@ -5,12 +5,13 @@ using namespace std;
 
 class Graph;
 
-// Actor and Movie structures remain the same
 struct Actor {
     int id;
     string name;
     int birthYear;
-    vector<int> movieIds;  // Add this to track relationships
+    vector<int> movieIds;
+    double rating;  //add rating
+    int ratingCount;
 };
 
 struct Movie {
@@ -18,10 +19,11 @@ struct Movie {
     string title;
     string plot;
     int year;
-    vector<int> actorIds;  // Add this to track relationships
+    vector<int> actorIds;
+    double rating;  //add rating
+    int ratingCount;
 };
 
-// Actor and movie nodes for dictionary remain the same
 struct ActorNode {
     int key;
     Actor* actor;
@@ -50,8 +52,8 @@ public:
     Dictionary(bool isActor, Graph* graph);
     ~Dictionary();
 
-    bool addActor(int key, string name, int birthYear);
-    bool addMovie(int key, string title, int year, string plot);
+    bool addActor(int key, string name, int birthYear, double rating, int ratingCount);
+    bool addMovie(int key, string title, int year, string plot, double rating, int ratingCount);
     bool updateActor(int key, string name, int birthYear);
     bool updateMovie(int key, string title, int year, string plot);
     void remove(int key);
@@ -67,4 +69,8 @@ public:
     vector<int> getMovieActors(int movieId);
     vector<Actor*> getAllActors();
     vector<Movie*> getAllMovies();
+
+    //rating
+    bool updateActorRating(int key, double rating);
+    bool updateMovieRating(int key, double rating);
 };

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "Graph.h"
 #include "Dictionary.h"
 
@@ -10,6 +11,8 @@ using namespace std;
 void importActorCSV(const string& filename, Graph& graph);
 void importMovieCSV(const string& filename, Graph& graph);
 void importCastCSV(const string& filename, Graph& graph);
+void rateActor(const string& filename, Graph& graph, int id, double rating);
+void rateMovie(const string& filename, Graph& graph, int id, double rating);
 void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph);
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph);
 void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph);
@@ -154,6 +157,8 @@ int main() {
                     << "3 - Display all movies an actor starred in alphabetical order\n"
                     << "4 - Display all actors in a particular movie in alphabetical order\n"
                     << "5 - Display a list of all actors that a particular actor knows\n"
+                    << "6 - Rate an actor\n"
+                    << "7 - Rate a movie\n"
                     << "0 - Exit\nEnter operation: ";
                 int operation;
                 cin >> operation;
@@ -190,11 +195,197 @@ int main() {
                     cin >> actorId;
                     movieGraph.displayActorNetwork(actorId);
                 }
+                else if (operation == 6) {
+                    cout << "Rate an Actor\n";
+                    cout << "Enter actor ID: ";
+                    int actorId;
+                    cin >> actorId;
+                    cout << "Enter rating (1-5): ";
+                    double rating;
+                    cin >> rating;
+                    rateActor("actors.csv", movieGraph, actorId, rating);
+                }
+                else if (operation == 7) {
+                    cout << "Rate a Movie\n";
+                    cout << "Enter movie ID: ";
+                    int movieId;
+                    cin >> movieId;
+                    cout << "Enter rating (1-5): ";
+                    double rating;
+                    cin >> rating;
+                    rateMovie("movies.csv", movieGraph, movieId, rating);
+                }
             }
         }
     }
     return 0;
 }
+
+void rateActor(const string& filename, Graph& graph, int id, double rating) {
+    auto actor = graph.findActor(id);
+    if (actor) {
+        graph.updateActorRating(id, rating);
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file" << endl;
+            return;
+        }
+        vector<string> lines;
+        string line;
+        bool found = false;
+
+        // Read the header and add it to the list
+        if (getline(file, line)) {
+            lines.push_back(line);  // Add header
+        }
+
+        // Read all lines and store them in memory
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string idStr, name, birthYear, oldRating, oldRatingCount;
+
+            getline(ss, idStr, ',');
+            getline(ss, name, ',');
+            getline(ss, birthYear, ',');
+            getline(ss, oldRating, ',');
+            getline(ss, oldRatingCount);
+
+            try {
+                int currentId = stoi(idStr);
+                if (currentId == id) {
+                    string updatedLine = idStr + "," +
+                        name + "," +
+                        birthYear + "," +
+                        to_string(actor->rating) + "," +
+                        to_string(actor->ratingCount);
+                    lines.push_back(updatedLine);  // Add updated line
+                    found = true;
+                }
+                else {
+                    lines.push_back(line);  // Keep the original line
+                }
+            }
+            catch (const invalid_argument& e) {
+                lines.push_back(line);  // Add invalid lines as they are
+            }
+        }
+        file.close();
+
+        if (!found) {
+            cout << "Actor with ID " << id << " not found in " << filename << ".\n";
+            return;
+        }
+
+        // Rewrite the entire CSV file with updated data
+        ofstream outFile(filename);
+        if (!outFile.is_open()) {
+            cout << "Error: Could not open file for writing" << endl;
+            return;
+        }
+
+        for (const string& updatedLine : lines) {
+            outFile << updatedLine << endl;
+        }
+
+        outFile.close();
+        cout << "Actor rating updated successfully in " << filename << " and graph.\n";
+    }
+    else {
+        cout << "Actor with ID " << id << " not found in the graph.\n";
+    }
+}
+
+void rateMovie(const string& filename, Graph& graph, int id, double rating) {
+    auto movie = graph.findMovie(id);
+    if (movie) {
+        graph.updateMovieRating(id, rating);
+
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file" << endl;
+            return;
+        }
+        vector<string> lines;
+        string line;
+        bool found = false;
+
+        // Read the header and add it to the list
+        if (getline(file, line)) {
+            lines.push_back(line);  // Add header
+        }
+
+        // Read all lines and store them in memory
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string idStr, title, plot, year, oldRating, oldRatingCount;
+
+            getline(ss, idStr, ',');
+            getline(ss, title, ',');
+
+            // Properly extract the plot, handling quotes
+            if (line.find('"') != string::npos) {
+                // Find first and last quotes to get full plot text
+                size_t firstQuote = line.find('"');
+                size_t lastQuote = line.find('"', firstQuote + 1);
+                plot = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+
+                // Adjust stream position to skip past the plot field
+                ss.ignore(lastQuote + 2 - (firstQuote + 1));
+            }
+            else {
+                getline(ss, plot, ',');
+            }
+
+            getline(ss, year, ',');
+            getline(ss, oldRating, ',');
+            getline(ss, oldRatingCount);
+
+            try {
+                int currentId = stoi(idStr);
+                if (currentId == id) {
+                    string updatedLine = idStr + "," +
+                        title + "," +
+                        "\"" + plot + "\"," +  // Ensure quotes around plot
+                        year + "," +
+                        to_string(movie->rating) + "," +
+                        to_string(movie->ratingCount);
+                    lines.push_back(updatedLine);  // Add updated line
+                    found = true;
+                }
+                else {
+                    lines.push_back(line);  // Keep the original line
+                }
+            }
+            catch (const invalid_argument& e) {
+                lines.push_back(line);  // Add invalid lines as they are
+            }
+        }
+        file.close();
+
+        if (!found) {
+            cout << "Movie with ID " << id << " not found in " << filename << ".\n";
+            return;
+        }
+
+        // Rewrite the entire CSV file with updated data
+        ofstream outFile(filename);
+        if (!outFile.is_open()) {
+            cout << "Error: Could not open file for writing" << endl;
+            return;
+        }
+
+        for (const string& updatedLine : lines) {
+            outFile << updatedLine << endl;
+        }
+
+        outFile.close();
+        cout << "Movie rating updated successfully in " << filename << " and graph.\n";
+    }
+    else {
+        cout << "Movie with ID " << id << " not found in the graph.\n";
+    }
+}
+
 
 void importActorCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
@@ -203,39 +394,80 @@ void importActorCSV(const string& filename, Graph& graph) {
         return;
     }
 
+    vector<string> updatedLines;
     string line;
-    getline(file, line); // Skip header
-    int count = 0;
 
+    // Read and store the header
+    if (getline(file, line)) {
+        updatedLines.push_back(line);  // Keep the header line
+        cout << "Skipping header: " << line << endl;
+    }
+
+    int count = 0;
     while (getline(file, line)) {
         stringstream ss(line);
-        string idStr, name, birthStr;
+        string idStr, name, birthStr, ratingStr, ratingCountStr;
 
-        getline(ss, idStr, ',');
-        getline(ss, name, ',');
-        getline(ss, birthStr, ',');
+        // Extract fields from the CSV line
+        getline(ss, idStr, ',');    // Actor ID
+        getline(ss, name, ',');     // Actor Name
+        getline(ss, birthStr, ','); // Birth Year
 
-        if (!name.empty() && name[0] == '"' && name[name.size() - 1] == '"') {
-            name = name.substr(1, name.size() - 2);
+        // Remove quotes if present in the name
+        if (!name.empty() && name.front() == '"' && name.back() == '"') {
+            name = name.substr(1, name.length() - 2);
+        }
+
+        // Check for rating and ratingCount columns, if missing assign defaults
+        if (!getline(ss, ratingStr, ',')) {
+            ratingStr = "0";  // Default rating
+        }
+        if (!getline(ss, ratingCountStr, ',')) {
+            ratingCountStr = "0";  // Default rating count
         }
 
         try {
             int id = stoi(idStr);
-            int birth = stoi(birthStr);
-            if (graph.addActor(id, name, birth)) {
+            int birthYear = stoi(birthStr);
+            double rating = stod(ratingStr);
+            int ratingCount = stoi(ratingCountStr);
+      
+            // Add actor to the graph
+            if (graph.addActor(id, name, birthYear, rating, ratingCount)) {
+               
+                
                 count++;
                 if (count % 100 == 0) {
                     cout << "Processed " << count << " actors...\r";
                 }
             }
+
+            // Store the corrected line to be written back to the file
+            updatedLines.push_back(idStr + "," + name + "," + birthStr + "," + ratingStr + "," + ratingCountStr);
         }
-        catch (const invalid_argument& e) {
+        catch (const invalid_argument&) {
             cout << "Skipping invalid row: " << line << endl;
         }
     }
-    cout << "Imported " << count << " actors successfully." << endl;
+
     file.close();
+
+    // Rewrite the same file with updated data
+    ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        cout << "Error: Could not open file for writing" << endl;
+        return;
+    }
+
+    for (const auto& updatedLine : updatedLines) {
+        outFile << updatedLine << "\n";
+    }
+
+    outFile.close();
+
+    cout << "Imported " << count << " actors successfully." << endl;
 }
+
 void importMovieCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -251,21 +483,20 @@ void importMovieCSV(const string& filename, Graph& graph) {
 
     int count = 0;
     while (getline(file, line)) {
-        // Variables to store parsed data
-        int id, year;
+        int id = 0, year = 0, ratingcnt = 0;
+        double rating = 0.0;
         string title, plot;
 
-        // State variables for parsing
         size_t pos = 0;
         bool inQuotes = false;
         string currentField;
         int fieldCount = 0;
 
-        // Parse the line character by character
+        // Parse the line character by character to handle quoted fields correctly
         for (size_t i = 0; i < line.length(); i++) {
             char c = line[i];
             if (c == '"') {
-                inQuotes = !inQuotes;
+                inQuotes = !inQuotes;  // Toggle inside/outside quotes
             }
             else if (c == ',' && !inQuotes) {
                 // Process the completed field
@@ -280,18 +511,33 @@ void importMovieCSV(const string& filename, Graph& graph) {
                     }
                     break;
                 case 1: // Title
-                    // Remove quotes if present
-                    if (currentField.front() == '"' && currentField.back() == '"') {
+                    if (!currentField.empty() && currentField.front() == '"' && currentField.back() == '"') {
                         currentField = currentField.substr(1, currentField.length() - 2);
                     }
                     title = currentField;
                     break;
                 case 2: // Plot
-                    // Remove quotes if present
-                    if (currentField.front() == '"' && currentField.back() == '"') {
+                    if (!currentField.empty() && currentField.front() == '"' && currentField.back() == '"') {
                         currentField = currentField.substr(1, currentField.length() - 2);
                     }
                     plot = currentField;
+                    break;
+                case 3: // Year
+                    try {
+                        year = stoi(currentField);
+                    }
+                    catch (...) {
+                        cout << "Invalid year in line: " << line << endl;
+                        goto nextLine;
+                    }
+                    break;
+                case 4: // Rating (optional)
+                    try {
+                        rating = currentField.empty() ? 0.0 : stod(currentField);
+                    }
+                    catch (...) {
+                        rating = 0.0;
+                    }
                     break;
                 }
                 currentField.clear();
@@ -302,17 +548,16 @@ void importMovieCSV(const string& filename, Graph& graph) {
             }
         }
 
-        // Process the last field (year)
+        // Process the last field (rating count, optional)
         try {
-            year = stoi(currentField);
+            ratingcnt = currentField.empty() ? 0 : stoi(currentField);
         }
         catch (...) {
-            cout << "Invalid year in line: " << line << endl;
-            continue;
+            ratingcnt = 0;
         }
 
         // Add to graph (false indicates it's a movie, not an actor)
-        if (graph.addMovie(id, title, year, plot)) {
+        if (graph.addMovie(id, title, year, plot, rating, ratingcnt)) {
             count++;
             if (count % 100 == 0) {
                 cout << "Processed " << count << " movies...\r";
@@ -326,6 +571,7 @@ void importMovieCSV(const string& filename, Graph& graph) {
     cout << "Imported " << count << " movies successfully." << endl;
     file.close();
 }
+
 
 void importCastCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
@@ -399,7 +645,7 @@ void importCastCSV(const string& filename, Graph& graph) {
 }
 
 void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph) {
-    if (graph.addActor(id, name, birthYear)) { //add actor to the graph
+    if (graph.addActor(id, name, birthYear, 0, 0)) { //add actor to the graph
         ofstream file(filename, ios::app);
         if (!file.is_open()) {
             cout << "Error: Could not open file " << filename << endl;
@@ -572,7 +818,7 @@ void updateMovieInCSV(const string& filename, int id, const string& newTitle, in
 
 
 void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph) {
-    if (graph.addMovie(id, title, year, plot)) { // Add movie to the graph
+    if (graph.addMovie(id, title, year, plot, 0, 0)) { // Add movie to the graph
         ofstream file(filename, ios::app);
         if (!file.is_open()) {
             cout << "Error: Could not open file " << filename << endl;

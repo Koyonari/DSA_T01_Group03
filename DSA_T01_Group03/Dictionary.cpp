@@ -45,9 +45,8 @@ int Dictionary::hash(int key) {
     return key % MAX_SIZE;
 }
 
-bool Dictionary::addActor(int key, string name, int birthYear) {
+bool Dictionary::addActor(int key, string name, int birthYear, double rating, int ratingCount) {
     if (!isActorDict) return false;
-
     int index = hash(key);
     // Check if key exists in actor chain
     ActorNode* current = actorItems[index];
@@ -63,6 +62,8 @@ bool Dictionary::addActor(int key, string name, int birthYear) {
     newActor->id = key;
     newActor->name = name;
     newActor->birthYear = birthYear;
+    newActor->rating = rating;
+    newActor->ratingCount = ratingCount;
     // Initialize empty vector for movie relationships
     newActor->movieIds = vector<int>();
 
@@ -74,7 +75,7 @@ bool Dictionary::addActor(int key, string name, int birthYear) {
     return true;
 }
 
-bool Dictionary::addMovie(int key, string title, int year, string plot) {
+bool Dictionary::addMovie(int key, string title, int year, string plot, double rating, int ratingCount) {
     if (isActorDict) return false;
 
     int index = hash(key);
@@ -93,6 +94,8 @@ bool Dictionary::addMovie(int key, string title, int year, string plot) {
     newMovie->title = title;
     newMovie->year = year;
     newMovie->plot = plot;
+    newMovie->rating = rating;
+    newMovie->ratingCount = ratingCount;
     // Initialize empty vector for actor relationships
     newMovie->actorIds = vector<int>();
 
@@ -309,4 +312,41 @@ void Dictionary::print() {
             }
         }
     }
+}
+
+bool Dictionary::updateActorRating(int key, double rating) {
+    if (!isActorDict) return false;
+    Actor* actor = getActor(key);
+    if (actor) {
+     
+        if (actor->ratingCount == 0) {
+            actor->rating = rating;
+        }
+        else {
+            actor->rating = ((actor->rating * actor->ratingCount) + rating) / (actor->ratingCount + 1);       
+        }
+        actor->ratingCount++;
+        
+        return true;
+    }
+    return false;
+}
+
+bool Dictionary::updateMovieRating(int key, double rating) {
+    if (isActorDict) return false;
+    Movie* movie = getMovie(key);
+    if (movie) {
+        if (movie->ratingCount == 0) {
+            movie->rating = rating;
+            
+        }
+        else {
+            
+            movie->rating = ((movie->rating * movie->ratingCount) + rating) / (movie->ratingCount + 1);
+            
+        }
+        movie->ratingCount++;
+        return true;
+    }
+    return false;
 }
