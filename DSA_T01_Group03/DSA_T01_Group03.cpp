@@ -159,8 +159,8 @@ int main() {
                     << "5 - Display a list of all actors that a particular actor knows\n"
                     << "6 - Rate an actor\n"
                     << "7 - Rate a movie\n"
-                    << "6 - Display actors by rating\n"
-                    << "7 - Display movies by rating\n"
+                    << "8 - Display actors by rating\n"
+                    << "9 - Display movies by rating\n"
                     << "0 - Exit\nEnter operation: ";
                 int operation;
                 cin >> operation;

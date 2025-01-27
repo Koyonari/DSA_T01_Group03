@@ -24,6 +24,8 @@ private:
     // Sorting helper functions
     void quickSort(vector<pair<string, int>>& arr, size_t low, size_t high);
     size_t partition(vector<pair<string, int>>& arr, size_t low, size_t high);
+    void quickSort(vector<pair<string, double>>& arr, size_t low, size_t high);
+    size_t partition(vector<pair<string, double>>& arr, size_t low, size_t high);
     void quickSort(vector<string>& arr, size_t low, size_t high);
     size_t partition(vector<string>& arr, size_t low, size_t high);
     void mergeSort(vector<MovieInfo>& arr, size_t left, size_t right);

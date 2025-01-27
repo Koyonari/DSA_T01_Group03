@@ -54,6 +54,28 @@ void Graph::quickSort(vector<pair<string, int>>& arr, size_t low, size_t high) {
     }
 }
 
+void Graph::quickSort(vector<pair<string, double>>& arr, size_t low, size_t high) {
+    if (low < high) {
+        size_t pivot = partition(arr, low, high);
+        if (pivot > 0) quickSort(arr, low, pivot - 1);
+        quickSort(arr, pivot + 1, high);
+    }
+}
+
+size_t Graph::partition(vector<pair<string, double>>& arr, size_t low, size_t high) {
+    int pivot = arr[high].second;
+    size_t i = low - 1;
+
+    for (size_t j = low; j <= high - 1; j++) {
+        if (arr[j].second <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
 size_t Graph::partition(vector<pair<string, int>>& arr, size_t low, size_t high) {
     int pivot = arr[high].second;
     size_t i = low - 1;
@@ -194,12 +216,11 @@ void Graph::displayActorMovies(int actorId) {
         return;
     }
 
-    vector<int> movieIds = actorDict->getActorMovies(actorId);
+    vector<Movie*> movies = actorDict->getActorMovies(actorId);
     vector<string> movieTitles;
 
     // Get movie titles
-    for (int movieId : movieIds) {
-        Movie* movie = findMovie(movieId);
+    for (Movie* movie : movies) {
         if (movie) {
             movieTitles.push_back(movie->title);
         }
@@ -229,12 +250,11 @@ void Graph::displayMovieCast(int movieId) {
         return;
     }
 
-    vector<int> actorIds = movieDict->getMovieActors(movieId);
+    vector<Actor*> actors = movieDict->getMovieActors(movieId);
     vector<string> actorNames;
 
     // Get actor names
-    for (int actorId : actorIds) {
-        Actor* actor = findActor(actorId);
+    for (Actor* actor : actors) {
         if (actor) {
             actorNames.push_back(actor->name);
         }
@@ -265,17 +285,17 @@ void Graph::displayActorNetwork(int actorId) {
     }
 
     vector<string> coActorNames;
-    vector<int> actorMovies = actorDict->getActorMovies(actorId);
+    vector<Movie*> actorMovies = actorDict->getActorMovies(actorId);
 
-    //for each movie the actor was in
-    for (int movieId : actorMovies) {
-        vector<int> castIds = movieDict->getMovieActors(movieId);
-        //for each actor in that movie
-        for (int castId : castIds) {
-            if (castId != actorId) {  
-                Actor* coActor = findActor(castId);
+    // For each movie the actor was in
+    for (Movie* movie : actorMovies) {
+        vector<Actor*> castActors = movieDict->getMovieActors(movie->id);
+
+        // For each actor in that movie
+        for (Actor* coActor : castActors) {
+            if (coActor->id != actorId) {
                 if (coActor) {
-                    //if they already in the list, dont add to the vector
+                    // If they are already in the list, don't add to the vector
                     bool alreadyExists = false;
                     for (const string& existingName : coActorNames) {
                         if (existingName == coActor->name) {
@@ -308,12 +328,13 @@ void Graph::displayActorNetwork(int actorId) {
     }
 }
 
+
 void Graph::displayActorsByRating() {
     cout << "\nActors displayed by rating :\n";
     cout << "----------------------------------------" << endl;
 
     vector<Actor*> allActors = actorDict->getAllActors();
-    vector<pair<string, int>> sortedActors;
+    vector<pair<string, double>> sortedActors;
 
     for (Actor* actor : allActors) {
         if (actor->ratingCount != 0) {
@@ -328,11 +349,14 @@ void Graph::displayActorsByRating() {
     if (sortedActors.size() > 1) {
         quickSort(sortedActors, 0, sortedActors.size() - 1);
     }
+    
+    
     for (auto i = sortedActors.rbegin(); i != sortedActors.rend(); i++) {
-        cout << (sortedActors.rend() - i) << ". "
+        cout << (i - sortedActors.rbegin() + 1) << ". "
             << left << setw(30) << i->first
-            << "Rating (/5): " << i->second << endl;
+            << "Rating: " << fixed << setprecision(2) << i->second << "/5" << endl;
     }
+
 }
 
 void Graph::displayMoviesByRating() {
@@ -340,7 +364,7 @@ void Graph::displayMoviesByRating() {
     cout << "----------------------------------------" << endl;
 
     vector<Movie*> allMovies = movieDict->getAllMovies();
-    vector<pair<string, int>> sortedMovies;
+    vector<pair<string, double>> sortedMovies;
 
     for (Movie* movie : allMovies) {
         if (movie->ratingCount != 0) {
@@ -354,9 +378,11 @@ void Graph::displayMoviesByRating() {
     if (sortedMovies.size() > 1) {
         quickSort(sortedMovies, 0, sortedMovies.size() - 1);
     }
+
+    //setprecision for 2dp
     for (auto i = sortedMovies.rbegin(); i != sortedMovies.rend(); i++) {
-        cout << (sortedMovies.rend() - i) << ". "
+        cout << (i - sortedMovies.rbegin() + 1) << ". "
             << left << setw(30) << i->first
-            << "Rating (/5): " << i->second << endl;
+            << "Rating: " << fixed << setprecision(2) << i->second << "/5" << endl;
     }
 }

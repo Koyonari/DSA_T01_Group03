@@ -4,12 +4,15 @@
 using namespace std;
 
 class Graph;
+struct Movie;
+struct Actor;
+
 
 struct Actor {
     int id;
     string name;
     int birthYear;
-    vector<int> movieIds;
+    vector<Movie*> movieIds;
     double rating;  //add rating
     int ratingCount;
 };
@@ -19,7 +22,7 @@ struct Movie {
     string title;
     string plot;
     int year;
-    vector<int> actorIds;
+    vector<Actor*> actorIds;
     double rating;  //add rating
     int ratingCount;
 };
@@ -65,8 +68,8 @@ public:
 
     // New methods for relationship management
     bool addRelationship(int actorId, int movieId);
-    vector<int> getActorMovies(int actorId);
-    vector<int> getMovieActors(int movieId);
+    vector<Movie*> getActorMovies(int actorId);
+    vector<Actor*> getMovieActors(int movieId);
     vector<Actor*> getAllActors();
     vector<Movie*> getAllMovies();
 

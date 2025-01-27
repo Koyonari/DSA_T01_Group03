@@ -65,7 +65,7 @@ bool Dictionary::addActor(int key, string name, int birthYear, double rating, in
     newActor->rating = rating;
     newActor->ratingCount = ratingCount;
     // Initialize empty vector for movie relationships
-    newActor->movieIds = vector<int>();
+    newActor->movieIds = vector<Movie*>();
 
     newNode->actor = newActor;
     newNode->next = actorItems[index];
@@ -97,7 +97,7 @@ bool Dictionary::addMovie(int key, string title, int year, string plot, double r
     newMovie->rating = rating;
     newMovie->ratingCount = ratingCount;
     // Initialize empty vector for actor relationships
-    newMovie->actorIds = vector<int>();
+    newMovie->actorIds = vector<Actor*>();
 
     newNode->movie = newMovie;
     newNode->next = movieItems[index];
@@ -121,35 +121,35 @@ bool Dictionary::addRelationship(int actorId, int movieId) {
 
     if (!actor || !movie) return false;
 
-    // Check if relationship already exists
-    if (find(actor->movieIds.begin(), actor->movieIds.end(), movieId) != actor->movieIds.end()) {
+    if (find(actor->movieIds.begin(), actor->movieIds.end(), movie) != actor->movieIds.end()) {
         cout << "Relationship already exists for Actor ID " << actorId << " and Movie ID " << movieId << endl;
         return false;
     }
 
+
     // Add relationship
-    actor->movieIds.push_back(movieId);
-    movie->actorIds.push_back(actorId);
+    actor->movieIds.push_back(movie);
+    movie->actorIds.push_back(actor);
     //cout << "Successfully added relationship: Actor " << actorId << " -> Movie " << movieId << endl;
 
     return true;
 }
 
 
-vector<int> Dictionary::getActorMovies(int actorId) {
+vector<Movie*> Dictionary::getActorMovies(int actorId) {
     Actor* actor = getActor(actorId);
     if (actor) {
         return actor->movieIds;
     }
-    return vector<int>();
+    return vector<Movie*>();
 }
 
-vector<int> Dictionary::getMovieActors(int movieId) {
+vector<Actor*> Dictionary::getMovieActors(int movieId) {
     Movie* movie = getMovie(movieId);
     if (movie) {
         return movie->actorIds;
     }
-    return vector<int>();
+    return vector<Actor*>();
 }
 
 vector<Actor*> Dictionary::getAllActors() {
