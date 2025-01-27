@@ -47,4 +47,6 @@ public:
     void displayActorMovies(int actorId);
     void displayMovieCast(int movieId);
     void displayActorNetwork(int actorId);
+    void displayActorsByRating();
+    void displayMoviesByRating();
 };

@@ -308,3 +308,55 @@ void Graph::displayActorNetwork(int actorId) {
     }
 }
 
+void Graph::displayActorsByRating() {
+    cout << "\nActors displayed by rating :\n";
+    cout << "----------------------------------------" << endl;
+
+    vector<Actor*> allActors = actorDict->getAllActors();
+    vector<pair<string, int>> sortedActors;
+
+    for (Actor* actor : allActors) {
+        if (actor->ratingCount != 0) {
+            sortedActors.push_back(make_pair(actor->name, actor->rating));
+        }
+        
+    }
+    if (sortedActors.empty()) {
+        cout << "No actors have ratings yet." << endl;
+        return;
+    }
+    if (sortedActors.size() > 1) {
+        quickSort(sortedActors, 0, sortedActors.size() - 1);
+    }
+    for (auto i = sortedActors.rbegin(); i != sortedActors.rend(); i++) {
+        cout << (sortedActors.rend() - i) << ". "
+            << left << setw(30) << i->first
+            << "Rating (/5): " << i->second << endl;
+    }
+}
+
+void Graph::displayMoviesByRating() {
+    cout << "\nMovies displayed by rating :\n";
+    cout << "----------------------------------------" << endl;
+
+    vector<Movie*> allMovies = movieDict->getAllMovies();
+    vector<pair<string, int>> sortedMovies;
+
+    for (Movie* movie : allMovies) {
+        if (movie->ratingCount != 0) {
+            sortedMovies.push_back(make_pair(movie->title, movie->rating));
+        }
+    }
+    if (sortedMovies.empty()) {
+        cout << "No movies have ratings yet." << endl;
+        return;
+    }
+    if (sortedMovies.size() > 1) {
+        quickSort(sortedMovies, 0, sortedMovies.size() - 1);
+    }
+    for (auto i = sortedMovies.rbegin(); i != sortedMovies.rend(); i++) {
+        cout << (sortedMovies.rend() - i) << ". "
+            << left << setw(30) << i->first
+            << "Rating (/5): " << i->second << endl;
+    }
+}

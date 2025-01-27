@@ -159,6 +159,8 @@ int main() {
                     << "5 - Display a list of all actors that a particular actor knows\n"
                     << "6 - Rate an actor\n"
                     << "7 - Rate a movie\n"
+                    << "6 - Display actors by rating\n"
+                    << "7 - Display movies by rating\n"
                     << "0 - Exit\nEnter operation: ";
                 int operation;
                 cin >> operation;
@@ -214,6 +216,12 @@ int main() {
                     double rating;
                     cin >> rating;
                     rateMovie("movies.csv", movieGraph, movieId, rating);
+                }
+                else if (operation == 8) {
+                    movieGraph.displayActorsByRating();
+                }
+                else if (operation == 9) {
+                    movieGraph.displayMoviesByRating();
                 }
             }
         }
@@ -297,94 +305,93 @@ void rateActor(const string& filename, Graph& graph, int id, double rating) {
 
 void rateMovie(const string& filename, Graph& graph, int id, double rating) {
     auto movie = graph.findMovie(id);
-    if (movie) {
-        graph.updateMovieRating(id, rating);
+    if (!movie) {
+        cout << "Movie with ID " << id << " not found in the graph.\n";
+        return;
+    }
 
-        ifstream file(filename);
-        if (!file.is_open()) {
-            cout << "Error: Could not open file" << endl;
-            return;
+    graph.updateMovieRating(id, rating);
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file" << endl;
+        return;
+    }
+
+    vector<string> lines;
+    string line;
+    bool found = false;
+
+    if (getline(file, line)) {
+        lines.push_back(line);
+    }
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string idStr, title, plot, yearStr, oldRating, oldRatingCount;
+
+        getline(ss, idStr, ',');
+        getline(ss, title, ',');
+
+        string plotPart;
+        getline(ss, plotPart, ',');
+        while (plotPart.front() == '"' && plotPart.back() != '"') {
+            string nextPart;
+            getline(ss, nextPart, ',');
+            plotPart += "," + nextPart;
         }
-        vector<string> lines;
-        string line;
-        bool found = false;
+        plot = plotPart;
 
-        // Read the header and add it to the list
-        if (getline(file, line)) {
-            lines.push_back(line);  // Add header
-        }
+        // Read remaining fields separately
+        string remainder;
+        getline(ss, remainder);
+        stringstream remSS(remainder);
+        getline(remSS, yearStr, ',');
+        getline(remSS, oldRating, ',');
+        getline(remSS, oldRatingCount);
 
-        // Read all lines and store them in memory
-        while (getline(file, line)) {
-            stringstream ss(line);
-            string idStr, title, plot, year, oldRating, oldRatingCount;
+        try {
+            int currentId = stoi(idStr);
+            if (currentId == id) {
+                if (plot.front() != '"') plot = "\"" + plot;
+                if (plot.back() != '"') plot = plot + "\"";
 
-            getline(ss, idStr, ',');
-            getline(ss, title, ',');
-
-            // Properly extract the plot, handling quotes
-            if (line.find('"') != string::npos) {
-                // Find first and last quotes to get full plot text
-                size_t firstQuote = line.find('"');
-                size_t lastQuote = line.find('"', firstQuote + 1);
-                plot = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
-
-                // Adjust stream position to skip past the plot field
-                ss.ignore(lastQuote + 2 - (firstQuote + 1));
+                string updatedLine = idStr + "," +
+                    title + "," +
+                    plot + "," +
+                    yearStr + "," +
+                    to_string(movie->rating) + "," +
+                    to_string(movie->ratingCount);
+                lines.push_back(updatedLine);
+                found = true;
             }
             else {
-                getline(ss, plot, ',');
-            }
-
-            getline(ss, year, ',');
-            getline(ss, oldRating, ',');
-            getline(ss, oldRatingCount);
-
-            try {
-                int currentId = stoi(idStr);
-                if (currentId == id) {
-                    string updatedLine = idStr + "," +
-                        title + "," +
-                        "\"" + plot + "\"," +  // Ensure quotes around plot
-                        year + "," +
-                        to_string(movie->rating) + "," +
-                        to_string(movie->ratingCount);
-                    lines.push_back(updatedLine);  // Add updated line
-                    found = true;
-                }
-                else {
-                    lines.push_back(line);  // Keep the original line
-                }
-            }
-            catch (const invalid_argument& e) {
-                lines.push_back(line);  // Add invalid lines as they are
+                lines.push_back(line);
             }
         }
-        file.close();
-
-        if (!found) {
-            cout << "Movie with ID " << id << " not found in " << filename << ".\n";
-            return;
+        catch (const invalid_argument& e) {
+            lines.push_back(line);
         }
-
-        // Rewrite the entire CSV file with updated data
-        ofstream outFile(filename);
-        if (!outFile.is_open()) {
-            cout << "Error: Could not open file for writing" << endl;
-            return;
-        }
-
-        for (const string& updatedLine : lines) {
-            outFile << updatedLine << endl;
-        }
-
-        outFile.close();
-        cout << "Movie rating updated successfully in " << filename << " and graph.\n";
     }
-    else {
-        cout << "Movie with ID " << id << " not found in the graph.\n";
+    file.close();
+
+    if (!found) {
+        cout << "Movie with ID " << id << " not found in " << filename << ".\n";
+        return;
     }
+
+    ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        cout << "Error: Could not open file for writing" << endl;
+        return;
+    }
+
+    for (const string& updatedLine : lines) {
+        outFile << updatedLine << endl;
+    }
+    outFile.close();
+    cout << "Movie rating updated successfully in " << filename << " and graph.\n";
 }
+
 
 
 void importActorCSV(const string& filename, Graph& graph) {
@@ -474,100 +481,73 @@ void importMovieCSV(const string& filename, Graph& graph) {
         cout << "Error: Could not open file " << filename << endl;
         return;
     }
-
     string line;
-    // Skip the header line
     if (getline(file, line)) {
         cout << "Skipping header: " << line << endl;
     }
-
     int count = 0;
     while (getline(file, line)) {
         int id = 0, year = 0, ratingcnt = 0;
         double rating = 0.0;
         string title, plot;
-
-        size_t pos = 0;
         bool inQuotes = false;
         string currentField;
         int fieldCount = 0;
+        vector<string> fields;
 
-        // Parse the line character by character to handle quoted fields correctly
+        // First pass: split into fields while respecting quotes
         for (size_t i = 0; i < line.length(); i++) {
             char c = line[i];
             if (c == '"') {
-                inQuotes = !inQuotes;  // Toggle inside/outside quotes
+                inQuotes = !inQuotes;
             }
             else if (c == ',' && !inQuotes) {
-                // Process the completed field
-                switch (fieldCount) {
-                case 0: // ID
-                    try {
-                        id = stoi(currentField);
-                    }
-                    catch (...) {
-                        cout << "Invalid ID in line: " << line << endl;
-                        goto nextLine;
-                    }
-                    break;
-                case 1: // Title
-                    if (!currentField.empty() && currentField.front() == '"' && currentField.back() == '"') {
-                        currentField = currentField.substr(1, currentField.length() - 2);
-                    }
-                    title = currentField;
-                    break;
-                case 2: // Plot
-                    if (!currentField.empty() && currentField.front() == '"' && currentField.back() == '"') {
-                        currentField = currentField.substr(1, currentField.length() - 2);
-                    }
-                    plot = currentField;
-                    break;
-                case 3: // Year
-                    try {
-                        year = stoi(currentField);
-                    }
-                    catch (...) {
-                        cout << "Invalid year in line: " << line << endl;
-                        goto nextLine;
-                    }
-                    break;
-                case 4: // Rating (optional)
-                    try {
-                        rating = currentField.empty() ? 0.0 : stod(currentField);
-                    }
-                    catch (...) {
-                        rating = 0.0;
-                    }
-                    break;
-                }
+                fields.push_back(currentField);
                 currentField.clear();
-                fieldCount++;
             }
             else {
                 currentField += c;
             }
         }
+        fields.push_back(currentField); // Add last field
 
-        // Process the last field (rating count, optional)
+        // Process fields based on count
         try {
-            ratingcnt = currentField.empty() ? 0 : stoi(currentField);
+            id = stoi(fields[0]);
+
+            title = fields[1];
+            if (!title.empty() && title.front() == '"' && title.back() == '"') {
+                title = title.substr(1, title.length() - 2);
+            }
+
+            plot = fields[2];
+            if (!plot.empty() && plot.front() == '"' && plot.back() == '"') {
+                plot = plot.substr(1, plot.length() - 2);
+            }
+
+            // If we have 5 or 6 fields, year is in position 3
+            // If we have 4 fields, year is in the last position
+            if (fields.size() >= 5) {
+                year = stoi(fields[3]);
+                rating = fields[4].empty() ? 0.0 : stod(fields[4]);
+                ratingcnt = (fields.size() > 5) ? (fields[5].empty() ? 0 : stoi(fields[5])) : 0;
+            }
+            else if (fields.size() == 4) {
+                year = stoi(fields[3]);
+            }
         }
         catch (...) {
-            ratingcnt = 0;
+            cout << "Invalid data in line: " << line << endl;
+            continue;
         }
 
-        // Add to graph (false indicates it's a movie, not an actor)
         if (graph.addMovie(id, title, year, plot, rating, ratingcnt)) {
             count++;
             if (count % 100 == 0) {
                 cout << "Processed " << count << " movies...\r";
             }
         }
-
-    nextLine:
-        continue;
     }
-
     cout << "Imported " << count << " movies successfully." << endl;
     file.close();
 }
