@@ -65,7 +65,7 @@ bool Dictionary::addActor(int key, string name, int birthYear, double rating, in
     newActor->rating = rating;
     newActor->ratingCount = ratingCount;
     // Initialize empty vector for movie relationships
-    newActor->movieIds = vector<Movie*>();
+    newActor->movies = vector<Movie*>();
 
     newNode->actor = newActor;
     newNode->next = actorItems[index];
@@ -97,7 +97,7 @@ bool Dictionary::addMovie(int key, string title, int year, string plot, double r
     newMovie->rating = rating;
     newMovie->ratingCount = ratingCount;
     // Initialize empty vector for actor relationships
-    newMovie->actorIds = vector<Actor*>();
+    newMovie->actors = vector<Actor*>();
 
     newNode->movie = newMovie;
     newNode->next = movieItems[index];
@@ -121,15 +121,15 @@ bool Dictionary::addRelationship(int actorId, int movieId) {
 
     if (!actor || !movie) return false;
 
-    if (find(actor->movieIds.begin(), actor->movieIds.end(), movie) != actor->movieIds.end()) {
+    if (find(actor->movies.begin(), actor->movies.end(), movie) != actor->movies.end()) {
         cout << "Relationship already exists for Actor ID " << actorId << " and Movie ID " << movieId << endl;
         return false;
     }
 
 
     // Add relationship
-    actor->movieIds.push_back(movie);
-    movie->actorIds.push_back(actor);
+    actor->movies.push_back(movie);
+    movie->actors.push_back(actor);
     //cout << "Successfully added relationship: Actor " << actorId << " -> Movie " << movieId << endl;
 
     return true;
@@ -139,7 +139,7 @@ bool Dictionary::addRelationship(int actorId, int movieId) {
 vector<Movie*> Dictionary::getActorMovies(int actorId) {
     Actor* actor = getActor(actorId);
     if (actor) {
-        return actor->movieIds;
+        return actor->movies;
     }
     return vector<Movie*>();
 }
@@ -147,7 +147,7 @@ vector<Movie*> Dictionary::getActorMovies(int actorId) {
 vector<Actor*> Dictionary::getMovieActors(int movieId) {
     Movie* movie = getMovie(movieId);
     if (movie) {
-        return movie->actorIds;
+        return movie->actors;
     }
     return vector<Actor*>();
 }
@@ -294,7 +294,7 @@ void Dictionary::print() {
                 std::cout << "ID: " << current->actor->id
                     << ", Name: " << current->actor->name
                     << ", Birth Year: " << current->actor->birthYear
-                    << ", Number of Movies: " << current->actor->movieIds.size() << "\n";
+                    << ", Number of Movies: " << current->actor->movies.size() << "\n";
                 current = current->next;
             }
         }
@@ -307,7 +307,7 @@ void Dictionary::print() {
                 std::cout << "ID: " << current->movie->id
                     << ", Title: " << current->movie->title
                     << ", Year: " << current->movie->year
-                    << ", Number of Actors: " << current->movie->actorIds.size() << "\n";
+                    << ", Number of Actors: " << current->movie->actors.size() << "\n";
                 current = current->next;
             }
         }

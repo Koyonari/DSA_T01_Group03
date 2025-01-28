@@ -12,7 +12,7 @@ struct Actor {
     int id;
     string name;
     int birthYear;
-    vector<Movie*> movieIds;
+    vector<Movie*> movies;
     double rating;  //add rating
     int ratingCount;
 };
@@ -22,7 +22,7 @@ struct Movie {
     string title;
     string plot;
     int year;
-    vector<Actor*> actorIds;
+    vector<Actor*> actors;
     double rating;  //add rating
     int ratingCount;
 };
