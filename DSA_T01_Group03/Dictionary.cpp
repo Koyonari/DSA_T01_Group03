@@ -112,7 +112,7 @@ bool Dictionary::addRelationship(int actorId, int movieId) {
     Movie* movie = nullptr;
     if (isActorDict) {
         movie = relationshipGraph->findMovie(movieId);
-        if (!movie) cout << "Movie ID " << movieId << " not found in the graph." << endl;
+        //if (!movie) cout << "Movie ID " << movieId << " not found in the graph." << endl;
     }
     else {
         movie = getMovie(movieId);
