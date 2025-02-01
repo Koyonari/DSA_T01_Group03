@@ -3,11 +3,12 @@
 #include <vector>
 using namespace std;
 
+// Forward declaration to prevent circular dependency issues, since Movie references Actor and vice versa
 class Graph;
 struct Movie;
 struct Actor;
 
-
+// Actor struct to store an Actor's information
 struct Actor {
     int id;
     string name;
@@ -17,6 +18,7 @@ struct Actor {
     int ratingCount;
 };
 
+// Movie struct to store a Movie's information
 struct Movie {
     int id;
     string title;
@@ -27,12 +29,14 @@ struct Movie {
     int ratingCount;
 };
 
+// ActorNode to store an Actor in the Dictionary
 struct ActorNode {
     int key;
     Actor* actor;
     ActorNode* next;
 };
 
+// MovieNode to store a Movie in the Dictionary
 struct MovieNode {
     int key;
     Movie* movie;

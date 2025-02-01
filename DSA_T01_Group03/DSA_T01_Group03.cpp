@@ -393,7 +393,7 @@ void rateMovie(const string& filename, Graph& graph, int id, double rating) {
 }
 
 
-
+// importActorCSV imports Actor objects from the filename, and populates the Graph with these Actor objects (both provided as parameters)
 void importActorCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -475,6 +475,7 @@ void importActorCSV(const string& filename, Graph& graph) {
     cout << "Imported " << count << " actors successfully." << endl;
 }
 
+// importMovieCSV imports Movie objects from the filename, and populates the Graph with these Movie objects (both provided as parameters)
 void importMovieCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -552,7 +553,7 @@ void importMovieCSV(const string& filename, Graph& graph) {
     file.close();
 }
 
-
+// importCastCSV imports Actor and Movie relationships from the filename, and populates the Graph with these relationships (both provided as parameters)
 void importCastCSV(const string& filename, Graph& graph) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -624,6 +625,7 @@ void importCastCSV(const string& filename, Graph& graph) {
     file.close();
 }
 
+// appendActorToCSV adds a new created Actor to the Graph, as well as the CSV file, so that it can be saved even after the program restarts
 void appendActorToCSV(const string& filename, int id, const string& name, int birthYear, Graph& graph) {
     if (graph.addActor(id, name, birthYear, 0, 0)) { //add actor to the graph
         ofstream file(filename, ios::app);
@@ -642,6 +644,7 @@ void appendActorToCSV(const string& filename, int id, const string& name, int bi
     }
 }
 
+// updateActorInCSV updates an Actor with updated attributes in the Graph, as well as the CSV file, so that changes can be saved even after the program restarts
 void updateActorInCSV(const string& filename, int id, const string& newName, int newBirthYear, Graph& graph) {
     auto actor = graph.findActor(id);
     if (actor) {
@@ -722,7 +725,7 @@ void updateActorInCSV(const string& filename, int id, const string& newName, int
     }
 }
 
-
+// updateMovieInCSV updates a Movie with updated attributes in the Graph, as well as the CSV file, so that changes can be saved even after the program restarts
 void updateMovieInCSV(const string& filename, int id, const string& newTitle, int newYear, const string& newPlot, Graph& graph) {
     auto movie = graph.findMovie(id);
     if (movie) {
@@ -796,7 +799,7 @@ void updateMovieInCSV(const string& filename, int id, const string& newTitle, in
     }
 }
 
-
+// appendActorToCSV adds a new created Movie to the Graph, as well as the CSV file, so that it can be saved even after the program restarts
 void appendMovieToCSV(const string& filename, int id, const string& title, int year, const string& plot, Graph& graph) {
     if (graph.addMovie(id, title, year, plot, 0, 0)) { // Add movie to the graph
         ofstream file(filename, ios::app);
@@ -815,6 +818,7 @@ void appendMovieToCSV(const string& filename, int id, const string& title, int y
     }
 }
 
+// appendActorToCSV adds a new created Actor and Movie relationship to the Graph, as well as the CSV file, so that it can be saved even after the program restarts
 void appendCastToCSV(const string& filename, int actorid, int movieid, Graph& graph) {
     if (graph.addEdge(actorid, movieid)) {
         ofstream file(filename, ios::app);

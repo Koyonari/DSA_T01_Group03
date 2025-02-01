@@ -1,8 +1,12 @@
 #include "Dictionary.h"
 #include <iostream>
 #include "Graph.h"
+
+// Constructor with bool and Graph parameters
+// bool is to find out if the dictionary is for actors or movies, so it can be populated correctly
+// Graph is passed in so that the relationships can be modelled in it later (relationshipGraph is an attribute of the class)
 Dictionary::Dictionary(bool isActor, Graph* graph)
-    : size(0), isActorDict(isActor), relationshipGraph(graph) {
+    : size(0), isActorDict(isActor), relationshipGraph(graph) { // To initialise the items in the class
     if (isActorDict) {
         for (int i = 0; i < MAX_SIZE; i++) {
             actorItems[i] = nullptr;  // Properly initialize all elements
@@ -15,7 +19,7 @@ Dictionary::Dictionary(bool isActor, Graph* graph)
     }
 }
 
-
+// The destructor, to properly delete a Dictionary without leaving any unhandled memory
 Dictionary::~Dictionary() {
     if (isActorDict) {
         for (int i = 0; i < MAX_SIZE; i++) {
@@ -41,10 +45,14 @@ Dictionary::~Dictionary() {
     }
 }
 
+// Function to hash a key by the MAX_SIZE and return the hashed value
+// MAX_SIZE is 101 and hence it is used to hash the key as it is not only a balanced size, but is a prime number that will distribute hash values more evenly
 int Dictionary::hash(int key) {
     return key % MAX_SIZE;
 }
 
+// addActor method adds a new Actor to the dictionary, creating a new Actor using all the parameters
+// returns a boolean based on if the addition was successful or not
 bool Dictionary::addActor(int key, string name, int birthYear, double rating, int ratingCount) {
     if (!isActorDict) return false;
     int index = hash(key);
@@ -75,6 +83,8 @@ bool Dictionary::addActor(int key, string name, int birthYear, double rating, in
     return true;
 }
 
+// addMovie method adds a new Movie to the dictionary, creating a new Movie using all the parameters
+// returns a boolean based on if the addition was successful or not
 bool Dictionary::addMovie(int key, string title, int year, string plot, double rating, int ratingCount) {
     if (isActorDict) return false;
 
@@ -107,6 +117,8 @@ bool Dictionary::addMovie(int key, string title, int year, string plot, double r
     return true;
 }
 
+// addRelationship adds a relationship between an Actor and a Movie, found by their respective IDs given as parameters (e.g. if actor starred in certain movie)
+// returns a boolean based on if the addition was successful or not
 bool Dictionary::addRelationship(int actorId, int movieId) {
     Actor* actor = getActor(actorId);
     Movie* movie = nullptr;
@@ -135,7 +147,8 @@ bool Dictionary::addRelationship(int actorId, int movieId) {
     return true;
 }
 
-
+// getActorMovies returns all Movies an Actor acted in (their vector of Movie pointers)
+// returns the vector of Movie pointers to the Movies they acted in
 vector<Movie*> Dictionary::getActorMovies(int actorId) {
     Actor* actor = getActor(actorId);
     if (actor) {
@@ -152,6 +165,8 @@ vector<Actor*> Dictionary::getMovieActors(int movieId) {
     return vector<Actor*>();
 }
 
+// getAllActors gets all the Actors registered in the system
+// returns a vector of Actor pointers
 vector<Actor*> Dictionary::getAllActors() {
     if (!isActorDict) return vector<Actor*>();
 
@@ -166,6 +181,8 @@ vector<Actor*> Dictionary::getAllActors() {
     return actors;
 }
 
+// getAllMovies gets all the Movies registered in the system
+// returns a vector of Movie pointers
 vector<Movie*> Dictionary::getAllMovies() {
     if (isActorDict) return vector<Movie*>();
 
@@ -180,6 +197,8 @@ vector<Movie*> Dictionary::getAllMovies() {
     return movies;
 }
 
+// getAllActors gets a specific Actor by their ID
+// returns a pointer to the Actor object
 Actor* Dictionary::getActor(int key) {
     if (!isActorDict) return nullptr;
     int index = hash(key);
@@ -193,6 +212,8 @@ Actor* Dictionary::getActor(int key) {
     return nullptr;
 }
 
+// getAllMovies gets a specific Movie by their ID
+// returns a pointer to the Movie object
 Movie* Dictionary::getMovie(int key) {
     if (isActorDict) return nullptr;
 
@@ -207,6 +228,8 @@ Movie* Dictionary::getMovie(int key) {
     return nullptr;
 }
 
+// updateActor updates an Actor's attributes provided by the new attribute values in the parameters
+// returns a boolean based on if the operation has succeeded
 bool Dictionary::updateActor(int key, string name, int birthYear) {
     if (!isActorDict) return false;
 
@@ -219,6 +242,8 @@ bool Dictionary::updateActor(int key, string name, int birthYear) {
     return false;
 }
 
+// updateMovie updates a Movie's attributes provided by the new attribute values in the parameters
+// returns a boolean based on if the operation has succeeded
 bool Dictionary::updateMovie(int key, string title, int year, string plot) {
     if (isActorDict) return false;
 
@@ -232,14 +257,18 @@ bool Dictionary::updateMovie(int key, string title, int year, string plot) {
     return false;
 }
 
+// isEmpty checks if the Dictionary has nothing inside it
+// returns true if it is empty and false if it's not
 bool Dictionary::isEmpty() {
     return size == 0;
 }
 
+// getLength returns the number of items inside the Dictionary
 int Dictionary::getLength() {
     return size;
 }
 
+// remove removes an item from the Dictionary, found by its key provided as a parameter
 void Dictionary::remove(int key) {
     int index = hash(key);
     if (isActorDict) {
@@ -284,6 +313,7 @@ void Dictionary::remove(int key) {
     }
 }
 
+// print prints all the contents of the Dictionary
 void Dictionary::print() {
     std::cout << "Dictionary Contents:\n";
     if (isActorDict) {
@@ -314,6 +344,9 @@ void Dictionary::print() {
     }
 }
 
+// updateActorRating updates the rating of an Actor found by their ID
+// The rating is calculated by getting the average of all ratings including the new rating that was passed in as a parameter
+// returns a boolean based on if the operation was successful or not
 bool Dictionary::updateActorRating(int key, double rating) {
     if (!isActorDict) return false;
     Actor* actor = getActor(key);
@@ -332,6 +365,9 @@ bool Dictionary::updateActorRating(int key, double rating) {
     return false;
 }
 
+// updateMovieRating updates the rating of a Movie found by their ID
+// The rating is calculated by getting the average of all ratings including the new rating that was passed in as a parameter
+// returns a boolean based on if the operation was successful or not
 bool Dictionary::updateMovieRating(int key, double rating) {
     if (isActorDict) return false;
     Movie* movie = getMovie(key);
