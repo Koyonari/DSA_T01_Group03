@@ -6,6 +6,7 @@ using namespace std;
 
 class Dictionary;
 
+// MovieInfo struct to store a Movie's information
 struct MovieInfo {
     string title;
     int year;
@@ -16,6 +17,7 @@ struct MovieInfo {
     }
 };
 
+// Graph class to store the relationship between Actors and Movies
 class Graph {
 private:
     Dictionary* actorDict;
@@ -35,6 +37,7 @@ public:
     Graph();
     ~Graph();
 
+	// Helper functions
     Actor* findActor(int id);
     Movie* findMovie(int id);
     bool addActor(int id, string name, int birthYear, double rating, int ratingCount);

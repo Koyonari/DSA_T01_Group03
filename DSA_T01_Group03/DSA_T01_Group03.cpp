@@ -1,3 +1,43 @@
+/* -------------------------------------------------------------------------------
+DSA Assignment by Group 3
+Brandon Koh Ziheng - S10255790
+An Yong Shyan - S10258126B
+----------------------------------------------------------------------------------
+Basic Features Admin Access - Brandon Koh Ziheng
+1. Add new actor
+2. Add new movie
+3. Add an actor to a movie
+4. Update actor details
+5. Update movie details
+
+Basic Features User Access - An Yong Shyan
+1. Display actors according to age
+2. Display movies made within the past 3 years
+3. Display all movies an actor starred in alphabetical order
+4. Display all actors in a particular movie in alphabetical order
+5. Display a list of all actors that a particular actor knows
+----------------------------------------------------------------------------------
+Additional Features (Under User Access) - Brandon Koh Ziheng
+1. Rate an actor
+2. Rate a movie
+3. Display actors by rating
+4. Display movies by rating
+
+Additional Features - An Yong Shyan
+Used Graph (bi-directional) data structure to improve time complexity by having 
+1 to 2 relationships between Graph class and Dictionary class (Actor and Movie).
+----------------------------------------------------------------------------------
+Helper Functions -  Brandon Koh Ziheng
+1. Import Actor CSV
+2. Import Movie CSV
+3. Import Cast CSV
+
+Helper Functions - An Yong Shyan
+1. Partition function
+2. Quick Sort algorithm
+3. Merge Sort algorithm
+------------------------------------------------------------------------------- */
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -8,6 +48,7 @@
 
 using namespace std;
 
+// Initialise functions
 void importActorCSV(const string& filename, Graph& graph);
 void importMovieCSV(const string& filename, Graph& graph);
 void importCastCSV(const string& filename, Graph& graph);
@@ -36,6 +77,8 @@ int main() {
         return 1;
     }
 
+
+	// Import data from CSV files
     cout << "Importing data..." << endl;
     importActorCSV("actors.csv", movieGraph);
     cout << "Actors imported successfully" << endl;
@@ -44,6 +87,8 @@ int main() {
     importCastCSV("cast.csv", movieGraph);
     cout << "Cast imported successfully" << endl;
 
+
+	// Main program loop
     while (true) {
         cout << "\n----------------------MOVIE WIKI----------------------\n";
         cout << "Welcome to Movie Wiki! This program allows you to add, update, and track movies and actors.\n";
@@ -54,12 +99,15 @@ int main() {
         if (choice == 0) break;
 
         if (choice == 1) {
+            // Prompt user for admin password - admin123
             cout << "Enter admin password: ";
             string password;
             cin >> password;
 
             if (password == "admin123") {
                 cout << "Access granted!\n------------------------------------------------------\n";
+
+				// Admin main menu loop
                 while (true) {
                     cout << "\nOperations\n1 - Add new actor\n2 - Add new movie\n"
                         << "3 - Add an actor to a movie\n4 - Update actor details\n"
@@ -67,8 +115,10 @@ int main() {
                     int operation;
                     cin >> operation;
 
+                    // Option - 0
                     if (operation == 0) break;
 
+                    // Option - 1
                     if (operation == 1) {
                         cout << "Enter actor ID: ";
                         int id;
@@ -84,6 +134,8 @@ int main() {
                      
                         appendActorToCSV("actors.csv", id, name, birthYear, movieGraph);
                     }
+
+                    // Option - 2
                     else if (operation == 2) {
                         cout << "Enter movie ID: ";
                         int id;
@@ -102,6 +154,8 @@ int main() {
 
                         appendMovieToCSV("movies.csv", id, title, year, plot, movieGraph);
                     }
+
+                    // Option - 3
                     else if (operation == 3) {
                         cout << "Enter actor ID: ";
                         int actorId;
@@ -112,6 +166,8 @@ int main() {
 
                         appendCastToCSV("cast.csv", actorId, movieId, movieGraph);
                     }
+
+					// Option - 4
                     else if (operation == 4) {
                         cout << "Enter actor ID to update: ";
                         int id;
@@ -125,6 +181,8 @@ int main() {
                         cin >> birthYear;
                         updateActorInCSV("actors.csv", id, name, birthYear, movieGraph);
                     }
+
+					// Option - 5
                     else if (operation == 5) {
                         cout << "Enter movie ID to update: ";
                         int id;
@@ -149,7 +207,10 @@ int main() {
                 cout << "Access denied!\n";
             }
         }
+
         else if (choice == 2) {
+
+			// User main menu loop
             while (true) {
                 cout << "\n------------------------------------------------------\n";
                 cout << "Operations\n1 - Display actors according to age\n"
@@ -165,8 +226,10 @@ int main() {
                 int operation;
                 cin >> operation;
 
+                // Option - 0
                 if (operation == 0) break;
 
+				// Option - 1
                 if (operation == 1) {
                     cout << "Enter starting age (inclusive): ";
                     int age1;
@@ -176,27 +239,37 @@ int main() {
                     cin >> age2;
                     movieGraph.displayActorsByAge(age1, age2);
                 }
+
+				// Option - 2
                 else if (operation == 2) {
                     movieGraph.displayRecentMovies();
                 }
+
+                // Option - 3
                 else if (operation == 3) {
                     cout << "Enter actor ID: ";
                     int actorId;
                     cin >> actorId;
                     movieGraph.displayActorMovies(actorId);
                 }
+
+                // Option - 4
                 else if (operation == 4) {
                     cout << "Enter movie ID: ";
                     int movieId;
                     cin >> movieId;
                     movieGraph.displayMovieCast(movieId);
                 }
+
+				// Option - 5
                 else if (operation == 5) {
                     cout << "Enter actor ID: ";
                     int actorId;
                     cin >> actorId;
                     movieGraph.displayActorNetwork(actorId);
                 }
+
+                // Option - 6
                 else if (operation == 6) {
                     cout << "Rate an Actor\n";
                     cout << "Enter actor ID: ";
@@ -207,6 +280,8 @@ int main() {
                     cin >> rating;
                     rateActor("actors.csv", movieGraph, actorId, rating);
                 }
+
+				// Option - 7
                 else if (operation == 7) {
                     cout << "Rate a Movie\n";
                     cout << "Enter movie ID: ";
@@ -217,9 +292,13 @@ int main() {
                     cin >> rating;
                     rateMovie("movies.csv", movieGraph, movieId, rating);
                 }
+
+                // Option - 8
                 else if (operation == 8) {
                     movieGraph.displayActorsByRating();
                 }
+
+                // Option - 9
                 else if (operation == 9) {
                     movieGraph.displayMoviesByRating();
                 }
@@ -229,15 +308,26 @@ int main() {
     return 0;
 }
 
+
+// Updates the rating of an actor in the CSV file and the graph with the provided rating
+// filename: The name of the CSV file to update
+// graph: The graph object to update
+// id: The ID of the actor to update
+// rating: The new rating to set for the actor
 void rateActor(const string& filename, Graph& graph, int id, double rating) {
+
+	// Find the actor in the graph 
     auto actor = graph.findActor(id);
     if (actor) {
+
+		// Update the actor's rating in the graph
         graph.updateActorRating(id, rating);
         ifstream file(filename);
         if (!file.is_open()) {
             cout << "Error: Could not open file" << endl;
             return;
         }
+
         vector<string> lines;
         string line;
         bool found = false;
@@ -303,13 +393,22 @@ void rateActor(const string& filename, Graph& graph, int id, double rating) {
     }
 }
 
+
+// Updates the rating of a movie in the CSV file and the graph with the provided rating
+// filename: The name of the CSV file to update
+// graph: The graph object to update
+// id: The ID of the movie to update
+// rating: The new rating to set for the movie
 void rateMovie(const string& filename, Graph& graph, int id, double rating) {
+
+	// Find the movie in the graph
     auto movie = graph.findMovie(id);
     if (!movie) {
         cout << "Movie with ID " << id << " not found in the graph.\n";
         return;
     }
 
+	// Update the movie's rating in the graph
     graph.updateMovieRating(id, rating);
     ifstream file(filename);
     if (!file.is_open()) {
