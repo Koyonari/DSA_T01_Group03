@@ -24,6 +24,7 @@ private:
     Dictionary* movieDict;
 
     // Sorting helper functions
+	// size_t is an unsigned integer that must be positive and is used to store sizes of arrays, strings and memory allocations
     void quickSort(vector<pair<string, int>>& arr, size_t low, size_t high);
     size_t partition(vector<pair<string, int>>& arr, size_t low, size_t high);
     void quickSort(vector<pair<string, double>>& arr, size_t low, size_t high);
